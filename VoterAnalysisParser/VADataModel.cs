@@ -8,21 +8,18 @@ namespace VoterAnalysisParser
 {
     public class VADataModel
     {
-        public string questionId { get; set; }
-        //        public List<h_answers> answers = new List<h_answers>();
-
-        public Answer[] h_answers { get; set; }
-        public string qcode { get; set; }
-        public string question { get; set; }
-        public string filter { get; set; }
-        public string sample_size { get; set; }
-        public string state { get; set; }
-        public string race_type { get; set; }
-        public string total_weight { get; set; }
-        public string race_id { get; set; }
-        public string question_order { get; set; }
-
-
+            public string questionId { get; set; }
+            public Answer[] h_answers { get; set; }
+            public string qcode { get; set; }
+            public string question { get; set; }
+            public string filter { get; set; }
+            public string sample_size { get; set; }
+            public string state { get; set; }
+            public string race_type { get; set; }
+            public string total_weight { get; set; }
+            public string race_id { get; set; }
+            public string question_order { get; set; }
+        
 
         public class Answer
         {

@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="deNorm_Xtabs.cs" />
     <Compile Include="VADataModel.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>

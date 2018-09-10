@@ -10,12 +10,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 
 namespace VoterAnalysisParser
 {
     public partial class frmMain : Form
     {
+        
         public frmMain()
         {
             InitializeComponent();
@@ -37,12 +39,18 @@ namespace VoterAnalysisParser
 
             try
             {
-                string json = textBox1.Text;
+                //string json = textBox1.Text;
 
-                //var json = File.ReadAllText(@"C:\X\VoterAnalysisParser\VoterAnalysisParser\test1.json");
+                var json = File.ReadAllText(@"C:\X\VoterAnalysisParser\VoterAnalysisParser\test1.json");
                 var array = JsonConvert.DeserializeObject(json) as JArray;
-                var models = (array[1] as JArray).ToObject<List<VADataModel>>();
-                
+                //var models = (array[1] as JArray).ToObject<List<VADataModel>>();
+                var questions = (array[1] as JArray).ToObject<List<VADataModel>>();
+
+                for (int i = 0; i < questions.Count(); i++)
+                {
+
+                }
+
 
             }
             catch (Exception ex)
@@ -52,18 +60,32 @@ namespace VoterAnalysisParser
 
         }
 
+        public void ParseQuestions(VADataModel questions)
+        {
+            //for (int i = 0; i < questions.Count(); i++)
+            {
+
+            }
+        }
+
         private void btnGetData_Click(object sender, EventArgs e)
         {
             string jsonData = GetVAData();
             textBox1.Text = jsonData;
+            
         }
 
-        private static string GetVAData()
+        private string GetVAData()
         {
+
+            Stopwatch stopWatch = new Stopwatch();
+            TimeSpan ts;
+
             var jsonResponse = "";
             string WEBSERVICE_URL = "https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=xtab&race=IL-G-91912&list_results=true2&list_answers=true";
             try
             {
+                stopWatch.Start();
                 var webRequest = System.Net.WebRequest.Create(WEBSERVICE_URL);
                 if (webRequest != null)
                 {
@@ -81,12 +103,16 @@ namespace VoterAnalysisParser
                     }
                     
                 }
-                
+                ts = stopWatch.Elapsed;
+                //label2.Text = $"Time to read dataset: {ts.Milliseconds} msec";
+                stopWatch.Stop();
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
+            
             return jsonResponse;
 
         }
