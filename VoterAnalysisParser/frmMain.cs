@@ -17,10 +17,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Threading;
 using System.Net.Http;
+using log4net.Appender;
+
 
 namespace VoterAnalysisParser
 {
-    public partial class frmMain : Form
+    public partial class frmMain : Form , IAppender
     {
 
         public string dbConn = "Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=gfxuser;Password=elect2018";
@@ -67,11 +69,71 @@ namespace VoterAnalysisParser
 
         static readonly HttpClient client = new HttpClient();
 
+        #region Logger instantiation - uses reflection to get module name
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        #endregion
+
+        #region Logging & status setup
+        // This method used to implement IAppender interface from log4net; to support custom appends to status strip
+        public void DoAppend(log4net.Core.LoggingEvent loggingEvent)
+        {
+            // Set text on status bar only if logging level is DEBUG or ERROR
+            if ((loggingEvent.Level.Name == "ERROR") | (loggingEvent.Level.Name == "DEBUG"))
+            {
+                //toolStripStatusLabel.BackColor = System.Drawing.Color.Red;
+                //toolStripStatusLabel.Text = String.Format("Error Logging Message: {0}: {1}", loggingEvent.Level.Name, loggingEvent.MessageObject.ToString());
+            }
+            else
+            {
+                //toolStripStatusLabel.BackColor = System.Drawing.Color.SpringGreen;
+                //toolStripStatusLabel.Text = String.Format("Status Logging Message: {0}: {1}", loggingEvent.Level.Name, loggingEvent.MessageObject.ToString());
+            }
+        }
+
+        // Handler to clear status bar message and reset color
+        #endregion
+
+
         public frmMain()
         {
             InitializeComponent();
+
+            // Set version number
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            this.Text = String.Format("Voter Analysis Parser  Version {0}", version);
+
+            log.Info($" ********** VoterAnalysisParser Started **********");
+
+            bool prodMode = Properties.Settings.Default.ProdMode;
+            if (prodMode)
+            {
+                baseUrl = Properties.Settings.Default.URL_Prod;
+                apiKey = Properties.Settings.Default.api_key_Prod;
+                dbConn = Properties.Settings.Default.dbConn_Prod;
+            }
+            else
+            {
+                baseUrl = Properties.Settings.Default.URL_QA;
+                apiKey = Properties.Settings.Default.api_key_QA;
+                dbConn = Properties.Settings.Default.dbConn_QA;
+            }
+
+
+            var builder = new SqlConnectionStringBuilder(dbConn);
+            var dataSource = builder.DataSource;
+            var initCat = builder.InitialCatalog;
+            var user = builder.UserID;
+            var pw = builder.Password;
+
+            lblBaseUrl.Text = baseUrl;
+
+            lblDB.Text = $"{dataSource}  {initCat}";
+
+
             //client.DefaultRequestHeaders.Add("x-api-key", "SpKGNVC1zl8AUolCQu4Qx4khpZiZNreD5hME1gMS");
             client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+
+
         }
 
         public class Wrapper
@@ -1469,7 +1531,7 @@ namespace VoterAnalysisParser
 
             textBox1.Text = jsonData;
 
-            if (jsonData != "[]")
+            if (jsonData.Length > 1 && jsonData != "[]")
             {
                 string racesWithData = jsonData.Replace("\"", "");
                 jsonData = racesWithData;
@@ -1506,86 +1568,107 @@ namespace VoterAnalysisParser
 
         public void GetAnswerUpdates()
         {
-            textBox1.Clear();
-            listBox1.Items.Clear();
+            try
+            {
 
-            //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=updates";
+                textBox1.Clear();
+                listBox1.Items.Clear();
 
-            //if (rbFS.Checked)
-            //if (dataType == 1)
+                //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=updates";
+
+                //if (rbFS.Checked)
+                //if (dataType == 1)
                 //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=updates";
 
-            int n = dataType * 2 + 1;
-            string url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[0]}";
+                int n = dataType * 2 + 1;
+                string url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[0]}";
 
-            string jsonData = SendAPIRequest(url);
+                string jsonData = SendAPIRequest(url);
 
-            textBox1.Text = jsonData;
+                textBox1.Text = jsonData;
 
-            if (jsonData != "[]")
-            {
-                string racesWithData = jsonData.Replace("\"", "");
-                jsonData = racesWithData;
-                racesWithData = jsonData.Replace("[", "");
-                jsonData = racesWithData;
-                racesWithData = jsonData.Replace("]", "");
-                jsonData = racesWithData;
-                racesWithData = jsonData.Replace(" ", "");
+                //if (jsonData != "[]")
+                if (jsonData.Length > 1 && jsonData != "[]")
 
-
-                // parse the header info
-                string[] strSeparator = new string[] { "," };
-                string[] Races;
-
-                // this takes the header and splits it into key-value pairs
-                Races = racesWithData.Split(strSeparator, StringSplitOptions.None);
-                int pos;
-                string deleteStr;
-
-                for (int i = 0; i < Races.Length; i++)
                 {
-                    listBox1.Items.Add(Races[i]);
-                    pos = Races[i].IndexOf("|");
-                    deleteStr = Races[i].Substring(pos + 1);
-                    Races[i] = Races[i].Substring(0, pos);
-                    if (deleteStr == "delete")
-                        AnswerDeletes.Add(Races[i]);
-                    else
-                        AnswerUpdates.Add(Races[i]);
+                    string racesWithData = jsonData.Replace("\"", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace("[", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace("]", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace(" ", "");
+
+
+                    // parse the header info
+                    string[] strSeparator = new string[] { "," };
+                    string[] Races;
+
+                    // this takes the header and splits it into key-value pairs
+                    Races = racesWithData.Split(strSeparator, StringSplitOptions.None);
+                    int pos;
+                    string deleteStr;
+
+                    for (int i = 0; i < Races.Length; i++)
+                    {
+                        listBox1.Items.Add(Races[i]);
+                        pos = Races[i].IndexOf("|");
+                        deleteStr = Races[i].Substring(pos + 1);
+                        Races[i] = Races[i].Substring(0, pos);
+                        if (deleteStr == "delete")
+                            AnswerDeletes.Add(Races[i]);
+                        else
+                            AnswerUpdates.Add(Races[i]);
+                    }
                 }
             }
-            
+            catch (Exception ex)
+            {
+                log.Error($"Error getting Answer Updates: {ex}");
+
+            }
+
+
         }
         public void GetQuestionData(string race)
         {
-            textBox1.Clear();
-            //string url;
+            try
+            {
+                textBox1.Clear();
+                //string url;
 
-            //if (dataType == 1)
+                //if (dataType == 1)
                 //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=data&id={race}";
-            //else
+                //else
                 //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_question&call_type=data&id={race}";
 
-            int n = dataType * 2;
-            string url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[1]}{race}";
+                int n = dataType * 2;
+                string url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[1]}{race}";
 
-            string jsonData = SendAPIRequest(url);
-            textBox1.Text = jsonData;
-            if (jsonData.Length > 10)
-                ProcessQuestionData(jsonData, race);
-            else
-            {
-                //if (dataType == 1)
-                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=receipt&id={race}";
-                //else
-                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_question&call_type=receipt&id={race}";
-
-
-                url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{race}";
+                string jsonData = SendAPIRequest(url);
+                textBox1.Text = jsonData;
+                if (jsonData.Length > 10)
+                    ProcessQuestionData(jsonData, race);
+                else
+                {
+                    //if (dataType == 1)
+                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=receipt&id={race}";
+                    //else
+                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_question&call_type=receipt&id={race}";
 
 
-                jsonData = SendAPIRequest(url);
+                    url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{race}";
+
+
+                    jsonData = SendAPIRequest(url);
+                }
             }
+            catch (Exception ex)
+            {
+                log.Error($"Error getting Question Data: {ex}");
+
+            }
+
         }
 
         public void ProcessQuestionData(string json, string race)
@@ -1682,6 +1765,7 @@ namespace VoterAnalysisParser
                 else
                 {
                     listBox2.Items.Add($"Data error for Q: {race}");
+                    log.Error($"Data error for Q: {race}");
                 }
 
                 string url;
@@ -1701,39 +1785,50 @@ namespace VoterAnalysisParser
             }
             catch (Exception ex)
             {
-                var info = ex.Message;
+                log.Error($"Error processing Question Data: {race}  {ex}");
+
             }
         }
 
         public void GetAnswerData(string race)
         {
-            textBox1.Clear();
-            //string url;
-
-            //if (dataType == 1)
-            //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=data&id={race}";
-            //else
-            //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=data&id={race}";
-
-            int n = dataType * 2 + 1;
-            string url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[1]}{race}";
-
-            string jsonData = SendAPIRequest(url);
-            textBox1.Text = jsonData;
-            if (jsonData.Length > 10)
-                ProcessAnswerData(jsonData, race);
-            else
+            try
             {
+
+                textBox1.Clear();
+                //string url;
+
                 //if (dataType == 1)
-                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=receipt&id={race}";
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=data&id={race}";
                 //else
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=data&id={race}";
+
+                int n = dataType * 2 + 1;
+                string url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[1]}{race}";
+
+                string jsonData = SendAPIRequest(url);
+                textBox1.Text = jsonData;
+                if (jsonData.Length > 10)
+                    ProcessAnswerData(jsonData, race);
+                else
+                {
+                    //if (dataType == 1)
+                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=receipt&id={race}";
+                    //else
                     //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=receipt&id={race}";
 
-                url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{race}";
+                    url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{race}";
 
-                jsonData = SendAPIRequest(url);
+                    jsonData = SendAPIRequest(url);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error getting Answer Data: {race}  {ex}");
 
             }
+
 
         }
 
@@ -1831,7 +1926,11 @@ namespace VoterAnalysisParser
                                         sq.party = answers.h_answers[j].results[ri - 1].party;
 
                                         if (sq.name == "Republican" || sq.name == "Democrat")
-                                            sq.party = sq.name;
+                                            sq.party = sq.name.Substring(0,3);
+
+
+                                        if (sq.party.Length > 3)
+                                            sq.party = sq.party.Substring(0, 3);
 
 
 
@@ -1859,6 +1958,8 @@ namespace VoterAnalysisParser
                 else
                 {
                     listBox2.Items.Add($"Data error for A: {race}");
+                    log.Error($"Data error for A: {race}");
+
                 }
 
                 string url;
@@ -1878,8 +1979,11 @@ namespace VoterAnalysisParser
             }
             catch (Exception ex)
             {
-                var info = ex.Message;
+                log.Error($"Error getting Answer Data: {race}  {ex}");
+
             }
+
+
 
         }
 
@@ -1966,7 +2070,9 @@ namespace VoterAnalysisParser
                 for (int i = 0; i < QuestionUpdates.Count; i++)
                 {
                     GetQuestionData(QuestionUpdates[i].Trim());
+                    label5.Text = $"Last Data Received: {DateTime.Now}";
                     msgs.Add(modeCode + "Q: " + QuestionUpdates[i].Trim());
+                    log.Debug($"{modeStr} Q: {QuestionUpdates[i].Trim()}");
                 }
                 QuestionUpdates.Clear();
 
@@ -1974,6 +2080,7 @@ namespace VoterAnalysisParser
                 {
                     DeleteData(QuestionDeletes[i].Trim(), dataType, "Q");
                     msgs.Add($"Deleting {modeCode} Q: {QuestionDeletes[i].Trim()}");
+                    log.Debug($"Deleting Q: {QuestionDeletes[i].Trim()}");
                 }
                 QuestionDeletes.Clear();
 
@@ -1983,7 +2090,9 @@ namespace VoterAnalysisParser
                 for (int i = 0; i < AnswerUpdates.Count; i++)
                 {
                     GetAnswerData(AnswerUpdates[i].Trim());
+                    label5.Text = $"Last Data Received: {DateTime.Now}";
                     msgs.Add(modeCode + "A: " + AnswerUpdates[i].Trim());
+                    log.Debug($"{modeCode} A: {AnswerUpdates[i].Trim()}");
                 }
                 AnswerUpdates.Clear();
 
@@ -1991,6 +2100,7 @@ namespace VoterAnalysisParser
                 {
                     DeleteData(AnswerDeletes[i].Trim(), dataType, "A");
                     msgs.Add($"Deleting {modeCode} A: {AnswerDeletes[i].Trim()}");
+                    log.Debug($"Deleting A: {AnswerDeletes[i].Trim()}");
                 }
                 AnswerDeletes.Clear();
 
@@ -2007,7 +2117,9 @@ namespace VoterAnalysisParser
             for (int i = 0; i < MapUpdates.Count; i++)
             {
                 GetMapData(MapUpdates[i].Trim());
+                label5.Text = $"Last Data Received: {DateTime.Now}";
                 msgs.Add(modeCode + " M: " + MapUpdates[i].Trim());
+                log.Debug($"{modeStr} M: {MapUpdates[i].Trim()}");
             }
             MapUpdates.Clear();
 
@@ -2015,6 +2127,7 @@ namespace VoterAnalysisParser
             {
                 DeleteData(MapDeletes[i].Trim(), dataType, "M");
                 msgs.Add($"Deleting {modeCode}  M: {MapDeletes[i].Trim()}");
+                log.Debug($"Deleting M: {MapDeletes[i].Trim()}");
             }
             MapDeletes.Clear();
 
@@ -2028,52 +2141,65 @@ namespace VoterAnalysisParser
 
         public void DeleteData(string VA_Data, int dataType, string QnA)
         {
-            string tblName = "FE_VoterAnalysisData_Ticker";
 
-            if (dataType == 1)
-                tblName = "FE_VoterAnalysisData_FullScreen";
-
-
-            string delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{VA_Data}'";
-            IssueSQLCmd(delCmd);
-
-            string url = "";
-
-            int n;
-
-            if (QnA == "A")
+            try
             {
-                n = dataType * 2 + 1;
-                url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{VA_Data}";
 
-                //if (dataType == 1)
+                string tblName = "FE_VoterAnalysisData_Ticker";
+
+                if (dataType == 1)
+                    tblName = "FE_VoterAnalysisData_FullScreen";
+
+                if (QnA == "M")
+                    tblName = "FE_VoterAnalysisData_Map";
+
+
+                string delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{VA_Data}'";
+                IssueSQLCmd(delCmd);
+
+                string url = "";
+
+                int n;
+
+                if (QnA == "A")
+                {
+                    n = dataType * 2 + 1;
+                    url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{VA_Data}";
+
+                    //if (dataType == 1)
                     //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=receipt&id={VA_Data}";
-                //else
+                    //else
                     //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=receipt&id={VA_Data}";
-            }
+                }
 
 
-            if (QnA == "Q")
-            {
-                n = dataType * 2;
-                url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{VA_Data}";
+                if (QnA == "Q")
+                {
+                    n = dataType * 2;
+                    url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[2]}{VA_Data}";
 
-                //if (dataType == 1)
+                    //if (dataType == 1)
                     //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=receipt&id={VA_Data}";
-                //else
+                    //else
                     //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_question&call_type=receipt&id={VA_Data}";
+                }
+
+
+                if (QnA == "M")
+                {
+                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=receipt&id={VA_Data}";
+                    url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[2]}{VA_Data}";
+
+                }
+
+                string jsonData = SendAPIRequest(url);
+
             }
-
-
-            if (QnA == "M")
+            catch (Exception ex)
             {
-                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=receipt&id={VA_Data}";
-                url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[2]}{VA_Data}";
+                log.Error($"Delete Error: {VA_Data} {ex}");
 
             }
-
-            string jsonData = SendAPIRequest(url);
-
 
         }
 
@@ -2241,7 +2367,7 @@ namespace VoterAnalysisParser
         private void timer2_Tick(object sender, EventArgs e)
         {
             cnt++;
-            if (cnt == 6)
+            if (cnt == 1)
             {
                 timer2.Enabled = false;
                 lblDataMode.Text = "Running...";
@@ -2267,77 +2393,97 @@ namespace VoterAnalysisParser
 
         public void GetMapUpdates()
         {
-            textBox1.Clear();
-            listBox1.Items.Clear();
-            //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=updates";
-
-            int n = dataType * 2 + 1;
-            string url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[0]}";
-
-            string jsonData = SendAPIRequest(url);
-
-            textBox1.Text = jsonData;
-
-            if (jsonData != "[]")
+            try
             {
-                string racesWithData = jsonData.Replace("\"", "");
-                jsonData = racesWithData;
-                racesWithData = jsonData.Replace("[", "");
-                jsonData = racesWithData;
-                racesWithData = jsonData.Replace("]", "");
-                jsonData = racesWithData;
-                racesWithData = jsonData.Replace(" ", "");
+                textBox1.Clear();
+                listBox1.Items.Clear();
+                //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=updates";
 
+                int n = dataType * 2 + 1;
+                string url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[0]}";
 
-                // parse the header info
-                string[] strSeparator = new string[] { "," };
-                string[] Races;
+                string jsonData = SendAPIRequest(url);
 
-                // this takes the header and splits it into key-value pairs
-                Races = racesWithData.Split(strSeparator, StringSplitOptions.None);
-                int pos;
-                string deleteStr;
+                textBox1.Text = jsonData;
 
-
-                for (int i = 0; i < Races.Length; i++)
+                //if (jsonData != "[]")
+                if (jsonData.Length > 1 && jsonData != "[]")
                 {
-                    listBox1.Items.Add(Races[i]);
-                    pos = Races[i].IndexOf("|");
-                    deleteStr = Races[i].Substring(pos + 1);
-                    Races[i] = Races[i].Substring(0, pos);
-                    if (deleteStr == "delete")
-                        MapDeletes.Add(Races[i]);
-                    else
-                        MapUpdates.Add(Races[i]);
+                    string racesWithData = jsonData.Replace("\"", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace("[", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace("]", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace(" ", "");
+
+
+                    // parse the header info
+                    string[] strSeparator = new string[] { "," };
+                    string[] Races;
+
+                    // this takes the header and splits it into key-value pairs
+                    Races = racesWithData.Split(strSeparator, StringSplitOptions.None);
+                    int pos;
+                    string deleteStr;
+
+
+                    for (int i = 0; i < Races.Length; i++)
+                    {
+                        listBox1.Items.Add(Races[i]);
+                        pos = Races[i].IndexOf("|");
+                        deleteStr = Races[i].Substring(pos + 1);
+                        Races[i] = Races[i].Substring(0, pos);
+                        if (deleteStr == "delete")
+                            MapDeletes.Add(Races[i]);
+                        else
+                            MapUpdates.Add(Races[i]);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                log.Error($"Error getting Map Updates  {ex}");
+
+            }
+
         }
 
         public void GetMapData(string race)
         {
-            textBox1.Clear();
-
-            //string raceID = tbRace.Text.Trim();
-            //int pos = raceID.IndexOf("|");
-            //string deleteStr = raceID.Substring(pos + 1);
-            //string race = raceID.Substring(0, pos);
-
-            //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=data&id={race}";
-
-            //int n = dataType * 2 + 1;
-            string url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[1]}{race}";
-
-            string jsonData = SendAPIRequest(url);
-            textBox1.Text = jsonData;
-
-            if (jsonData.Length > 10)
-                ProcessMapData(jsonData, race);
-            else
+            try
             {
-                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=receipt&id={race}";
-                url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[2]}{race}";
-                jsonData = SendAPIRequest(url);
+
+                textBox1.Clear();
+
+                //string raceID = tbRace.Text.Trim();
+                //int pos = raceID.IndexOf("|");
+                //string deleteStr = raceID.Substring(pos + 1);
+                //string race = raceID.Substring(0, pos);
+
+                //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=data&id={race}";
+
+                //int n = dataType * 2 + 1;
+                string url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[1]}{race}";
+
+                string jsonData = SendAPIRequest(url);
+                textBox1.Text = jsonData;
+
+                if (jsonData.Length > 10)
+                    ProcessMapData(jsonData, race);
+                else
+                {
+                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=receipt&id={race}";
+                    url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[2]}{race}";
+                    jsonData = SendAPIRequest(url);
+                }
             }
+            catch (Exception ex)
+            {
+                log.Error($"Error getting Map Data: {race}  {ex}");
+
+            }
+
         }
 
         public void ProcessMapData(string json, string race)
@@ -2405,6 +2551,7 @@ namespace VoterAnalysisParser
                 else
                 {
                     listBox2.Items.Add($"Data error for M: {race}");
+                    log.Error($"Data error for M: {race}");
                 }
 
                 //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=receipt&id={race}";
@@ -2415,7 +2562,7 @@ namespace VoterAnalysisParser
             }
             catch (Exception ex)
             {
-                var info = ex.Message;
+                log.Error($"Error processing Map Data: {race}  {ex}");
             }
 
         }

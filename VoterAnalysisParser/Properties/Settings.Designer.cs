@@ -8,22 +8,84 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace VoterAnalysisParser.Properties
-{
-
-
+namespace VoterAnalysisParser.Properties {
+    
+    
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
-    {
-
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.8.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+        
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-
-        public static Settings Default
-        {
-            get
-            {
+        
+        public static Settings Default {
+            get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd_Embargo;Persist Security Info=Tr" +
+            "ue;User ID=gfxuser;Password=elect2018")]
+        public string dbConn_Prod {
+            get {
+                return ((string)(this["dbConn_Prod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://rghm0pgome.execute-api.us-east-1.amazonaws.com/prod?page_type=stack")]
+        public string URL_Prod {
+            get {
+                return ((string)(this["URL_Prod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("lb2jKp3m621H2YMcZnFVG3FwZvyjOvcQ7HCZ12AT")]
+        public string api_key_Prod {
+            get {
+                return ((string)(this["api_key_Prod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack")]
+        public string URL_QA {
+            get {
+                return ((string)(this["URL_QA"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("SpKGNVC1zl8AUolCQu4Qx4khpZiZNreD5hME1gMS")]
+        public string api_key_QA {
+            get {
+                return ((string)(this["api_key_QA"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User " +
+            "ID=gfxuser;Password=elect2018")]
+        public string dbConn_QA {
+            get {
+                return ((string)(this["dbConn_QA"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ProdMode {
+            get {
+                return ((bool)(this["ProdMode"]));
             }
         }
     }
