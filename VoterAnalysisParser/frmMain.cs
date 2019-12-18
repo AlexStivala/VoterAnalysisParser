@@ -67,7 +67,9 @@ namespace VoterAnalysisParser
         public int dataType = 0;
         public int cnt = 0;
 
-        static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new HttpClient();
+        public string token = "eyJraWQiOiJnSkZIN25vdjdKWDZmcHFqb1lpVnh1RG92azIzVXJTN0c1eFA0UHQ0VEk4PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJmZGRlOTc0Zi03N2RlLTRjNWMtYWZjOC00ZjhmNjY1YTQyNjYiLCJjb2duaXRvOmdyb3VwcyI6WyJTdGFja1B1c2giLCJTdGFja0VkaXQiLCJRdWFyYW50aW5lQWNjZXNzIiwiVGllcjIiLCJEeW5hbWljUXVlcmllcyIsIlZpZXdUb3RhbHMiLCJIaWRlUUNvZGVzIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9wWkpjbWUxeEYiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiZmRkZTk3NGYtNzdkZS00YzVjLWFmYzgtNGY4ZjY2NWE0MjY2IiwiYXVkIjoidmNncjQ2ajBzZWZpZGI2a212dHQyY2ZyNSIsImV2ZW50X2lkIjoiYTRjNmYyZWUtMmZkYi00ZDdmLWE3ZDEtM2QwZTY4ODVhNGE4IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE1Njc3ODQ2OTQsImV4cCI6MTU2Nzc4ODI5NCwiaWF0IjoxNTY3Nzg0Njk0LCJlbWFpbCI6Im1hdHQuZmFyZ3Vzb25AZm94bmV3cy5jb20ifQ.CjeG05KxL1N-QyJqlOqoSwYG5nRT593vvn7qN-JsPB8nuenvOZSIC0h_G9-Y4nJq20DBpj6dMfBJSba836V_lDNnYbIWZ4vRljURK-wuBUD3FnPaarPD5jlfKrUtxyODW3kpRq7QUUvj1wGKnU3mgnKmTdxuA2pqR_5QR382J5yhNDtD_a_MMlD_iQP-9mc3nDf3r4AeMSArkKTZZ6VjdOFrJe1i4K8DgOtN7lzX9a1JnABku4HPl5JDkMnEaJJifqf6_DIn5ywMhS8KiOSwLX-vW9ET8oWtEuPg6iBj3WU0XpDs0HXpbslCEVIRb3JKH5VbvJj1J5oTe9l73j3jMw";
+        public string posturl = "https://d7icrmqr5f.execute-api.us-west-2.amazonaws.com/prod/";
 
         #region Logger instantiation - uses reflection to get module name
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -1012,7 +1014,29 @@ namespace VoterAnalysisParser
 
         }
 
-        
+        private string SendAPIPostRequest(string request)
+        {
+            var jsonResponse = "";
+
+            try
+            {
+                string url = posturl;
+                var content = new StringContent(request.ToString(), Encoding.UTF8, "application/json");
+                var result = client.PostAsync(url, content).Result;
+                //var result = await client.PostAsync(url, content);
+                jsonResponse = result.Content.ReadAsStringAsync().Result;
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            return jsonResponse;
+
+        }
+
 
         /*
         static readonly HttpClient client = new HttpClient();
@@ -1029,9 +1053,9 @@ namespace VoterAnalysisParser
             Console.WriteLine(lengthTask.Result);
         }
         */
-        
 
-        
+
+
         static async Task<string> GetAPIDataAsync(string url, string race)
         {
             Task<string> GetAPIData = client.GetStringAsync(url);
@@ -2567,8 +2591,105 @@ namespace VoterAnalysisParser
 
         }
 
+        private void button14_Click(object sender, EventArgs e)
+        {
+            VAPostModel test = new VAPostModel();
+
+            test.tk = token;
+            test.apikey = "undefined";
+            test.username = "UNKNOWN";
+            test.request.request_type = "stack";
+            test.request.stack_type = "fullscreen-answer";
+            test.request.method = "updates";
+            test.request.election_event = "2018_Midterms";
+
+            string JSONrequest = JsonConvert.SerializeObject(test);
+
+            string result = SendAPIPostRequest(JSONrequest);
+
+            textBox1.Text = result;
+
+            string jsonData = result;
+
+            if (jsonData.Length > 1 && jsonData != "[]")
+            {
+                string racesWithData = jsonData.Replace("\"", "");
+                jsonData = racesWithData;
+                racesWithData = jsonData.Replace("[", "");
+                jsonData = racesWithData;
+                racesWithData = jsonData.Replace("]", "");
+                jsonData = racesWithData;
+                racesWithData = jsonData.Replace(" ", "");
 
 
+                // parse the header info
+                string[] strSeparator = new string[] { "," };
+                string[] Races;
+
+                // this takes the header and splits it into key-value pairs
+                Races = racesWithData.Split(strSeparator, StringSplitOptions.None);
+                int pos;
+                string deleteStr;
+
+
+                for (int i = 0; i < Races.Length; i++)
+                {
+                    listBox1.Items.Add(Races[i]);
+                    pos = Races[i].IndexOf("|");
+                    deleteStr = Races[i].Substring(pos + 1);
+                    Races[i] = Races[i].Substring(0, pos);
+                    if (deleteStr == "delete")
+                        QuestionDeletes.Add(Races[i]);
+                    else
+                        QuestionUpdates.Add(Races[i]);
+                }
+            }
+
+
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            //for (int i = 0; i < QuestionUpdates.Count; i++)
+            //{
+
+            //}
+            ProcessUpdate(QuestionUpdates[0]);
+        }
+
+        public void ProcessUpdate(string update)
+        {
+
+            // parse the header info
+            string[] strSeparator = new string[] { ":" };
+            string[] Races;
+
+            // this takes the header and splits it into key-value pairs
+            Races = update.Split(strSeparator, StringSplitOptions.None);
+            string method = Races[3];
+
+
+
+
+            VAPostModel test = new VAPostModel();
+
+            test.tk = token;
+            test.apikey = "undefined";
+            test.username = "UNKNOWN";
+            test.request.request_type = "stack";
+            test.request.stack_type = method;
+            test.request.method = "data";
+            test.request.id = update;
+            test.request.election_event = "2018_Midterms";
+
+            string JSONrequest = JsonConvert.SerializeObject(test);
+
+            string result = SendAPIPostRequest(JSONrequest);
+            string jsonData = result;
+            textBox1.Text = result;
+
+
+        }
 
     }
 
