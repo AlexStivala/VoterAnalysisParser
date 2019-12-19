@@ -1405,7 +1405,7 @@ namespace VoterAnalysisParser
         public void UpdateVADDB(DataTable dt)
         {
             string spName = "spUpdate_VoterAnalysisData_Ticker";
-            
+
             if (dataType == 1)
                 spName = "spUpdate_VoterAnalysisData_FullScreen";
 
@@ -2640,7 +2640,7 @@ namespace VoterAnalysisParser
                     Races[i] = Races[i].Substring(0, pos);
                     if (deleteStr == "delete")
                         QuestionDeletes.Add(Races[i]);
-                    else
+                    else if (deleteStr == "create")
                         QuestionUpdates.Add(Races[i]);
                 }
             }
@@ -2650,11 +2650,11 @@ namespace VoterAnalysisParser
 
         private void button15_Click(object sender, EventArgs e)
         {
-            //for (int i = 0; i < QuestionUpdates.Count; i++)
-            //{
-
-            //}
-            ProcessUpdate(QuestionUpdates[0]);
+            for (int i = 0; i < QuestionUpdates.Count; i++)
+            {
+                ProcessUpdate(QuestionUpdates[i]);
+            }
+            
         }
 
         public void ProcessUpdate(string update)
@@ -2668,8 +2668,11 @@ namespace VoterAnalysisParser
             Races = update.Split(strSeparator, StringSplitOptions.None);
             string method = Races[3];
 
-
-
+            strSeparator = new string[] { "-" };
+            string[] qa;
+            qa = method.Split(strSeparator, StringSplitOptions.None);
+            string fullTick = qa[0];
+            string faq = qa[1];
 
             VAPostModel test = new VAPostModel();
 
@@ -2688,8 +2691,376 @@ namespace VoterAnalysisParser
             string jsonData = result;
             textBox1.Text = result;
 
+            string err = "stackTrace";
+            int pos = jsonData.IndexOf(err);
+            if (pos >= 0)
+            {
+                // Error - send receipt
+                SendReceipt(update); 
+            }
+            else
+            {
+                if (faq == "answer")
+                    ProcessAnswerDataNew(jsonData, update, fullTick);
+                else if (faq == "question")
+                    ProcessQuestionDataNew(jsonData, update, fullTick);
+            }
+        }
+
+        public void SendReceipt(string update)
+        {
+            // parse the header info
+            string[] strSeparator = new string[] { ":" };
+            string[] Races;
+
+            // this takes the header and splits it into key-value pairs
+            Races = update.Split(strSeparator, StringSplitOptions.None);
+            string method = Races[3];
+
+            VAPostModel test = new VAPostModel();
+
+            test.tk = token;
+            test.apikey = "undefined";
+            test.username = "UNKNOWN";
+            test.request.request_type = "stack";
+            test.request.stack_type = method;
+            test.request.method = "receipt";
+            test.request.id = update;
+            test.request.election_event = "2018_Midterms";
+
+            string JSONrequest = JsonConvert.SerializeObject(test);
+
+            string result = SendAPIPostRequest(JSONrequest);
+            string jsonData = result;
+            textBox1.Text = result;
+            
+        }
+
+        public void ProcessQuestionDataNew(string json, string update, string fullTick)
+        {
+            try
+            {
+
+                //string json = textBox1.Text;
+
+                VAQuestionModel questions = new VAQuestionModel();
+
+                string err = "stackTrace";
+                int pos = json.IndexOf(err);
+                if (pos == -1)
+                {
+
+                    questions = JsonConvert.DeserializeObject<VAQuestionModel>(json);
+
+
+                    List<VASQLDataModel> sqm = new List<VASQLDataModel>();
+
+                    int cnt = 0;
+                    int n = questions.h_answers.Count() + 1;
+
+
+                    //for (int i = 0; i < questions.Count(); i++)
+                    {
+                        //label1.Text = i.ToString();
+
+                        for (int j = 0; j < questions.h_answers.Count(); j++)
+                        {
+
+                            //for (int ri = 0; ri < questions[i].h_answers[j].results.Count() + 1; ri++)
+                            {
+                                VASQLDataModel sq = new VASQLDataModel();
+                                string fTimeStr = questions.formatted_update_time;
+                                DateTime fTime = Convert.ToDateTime(fTimeStr);
+
+                                {
+                                    cnt++;
+                                    label2.Text = cnt.ToString();
+
+
+                                    sq.VA_Data_Id = update;
+                                    sq.race_id = questions.race_id;
+                                    sq.r_type = "Q";
+                                    sq.questionId = questions.questionId;
+                                    sq.qcode = questions.qcode;
+                                    sq.question = questions.question;
+                                    sq.q_order = Convert.ToInt32(questions.question_order);
+                                    sq.filter = questions.filter;
+                                    sq.state = questions.state;
+
+                                    if (questions.race_type == "all")
+                                        sq.ofc = "A";
+                                    else
+                                        sq.ofc = questions.race_type;
+
+                                    sq.update_Time = questions.update_Time;
+                                    sq.f_update_time = fTime;
+                                    sq.preface = questions.preface;
+                                    sq.pk = questions.pk;
+                                    sq.def = Convert.ToBoolean(questions.def);
+                                    sq.sample_size = Convert.ToInt32(questions.sample_size);
+                                    sq.total_weight = Convert.ToSingle(questions.total_weight);
+                                    sq.variable_count = Convert.ToInt32(questions.h_answers[j].variable_count);
+                                    sq.variable_weight = Convert.ToSingle(questions.h_answers[j].variable_weight);
+                                    sq.variable_percent = Convert.ToInt32(questions.h_answers[j].variable_percent);
+                                    sq.answer = questions.h_answers[j].answer;
+                                    sq.a_order = Convert.ToInt32(questions.h_answers[j].order);
+                                    sq.answer_id = Convert.ToInt32(questions.h_answers[j].answer_id);
+                                    sq.name = string.Empty;
+                                    sq.id = 0;
+                                    sq.result_count = 0;
+                                    sq.result_percent = 0;
+                                    sq.result_weight = 0;
+                                    sq.party = string.Empty;
+                                    sq.stateId = GetStateID(questions.state);
+
+
+                                    sqm.Add(sq);
+                                }
+                            }
+                        }
+                    }
+
+
+                    dataGridView1.DataSource = sqm;
+                    DataTable dt = new DataTable();
+                    dt = ListToDataTable<VASQLDataModel>(sqm);
+                    UpdateVADDBNew(dt, fullTick);
+
+                }
+                else
+                {
+                    listBox2.Items.Add($"Data error for Q: {update}");
+                    log.Error($"Data error for Q: {update}");
+                }
+
+                SendReceipt(update);
+                
+                
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error processing Question Data: {update}  {ex}");
+            }
+        }
+
+        public void UpdateVADDBNew(DataTable dt, string fullTick)
+        {
+            string spName = "spUpdate_VoterAnalysisData_Ticker";
+
+            if (fullTick == "fullscreen")
+                spName = "spUpdate_VoterAnalysisData_FullScreen";
+
+            string cmdStr = $"{spName} ";
+
+            //Save out the top-level metadata
+            try
+            {
+                // Instantiate the connection
+                using (SqlConnection connection = new SqlConnection(dbConn))
+                {
+                    connection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter())
+                    {
+                        using (SqlCommand cmd = new SqlCommand())
+                        {
+                            SqlTransaction transaction;
+                            // Start a local transaction.
+                            transaction = connection.BeginTransaction("Update Voter Analysis Data");
+
+                            // Must assign both transaction object and connection 
+                            // to Command object for a pending local transaction
+                            cmd.Connection = connection;
+                            cmd.Transaction = transaction;
+
+                            try
+                            {
+                                //Specify base command
+                                cmd.CommandText = cmdStr;
+
+                                cmd.Parameters.Add("@tblVAD", SqlDbType.Structured).Value = dt;
+
+                                sqlDataAdapter.SelectCommand = cmd;
+                                sqlDataAdapter.SelectCommand.Connection = connection;
+                                sqlDataAdapter.SelectCommand.CommandType = CommandType.StoredProcedure;
+
+                                // Execute stored proc 
+                                sqlDataAdapter.SelectCommand.ExecuteNonQuery();
+
+                                //Attempt to commit the transaction
+                                transaction.Commit();
+                            }
+                            catch (Exception ex)
+                            {
+                                transaction.Rollback();
+                                textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
+                                //log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
+                                //log.Debug("UpdateData- SQL Command Exception occurred", ex);
+                            }
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                //log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
+                textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
+            }
 
         }
+
+        public void ProcessAnswerDataNew(string json, string update, string fullTick)
+        {
+            try
+            {
+
+                //string json = textBox1.Text;
+
+                VAAnswerModel answers = new VAAnswerModel();
+
+                string err = "stackTrace";
+                int pos = json.IndexOf(err);
+                if (pos == -1)
+                {
+
+                    answers = JsonConvert.DeserializeObject<VAAnswerModel>(json);
+
+                    List<VASQLDataModel> sqm = new List<VASQLDataModel>();
+
+                    int cnt = 0;
+                    int n = answers.h_answers.Count() + 1;
+                    int parsedResult;
+
+                    //for (int i = 0; i < questions.Count(); i++)
+                    {
+                        //label1.Text = i.ToString();
+
+                        for (int j = 0; j < answers.h_answers.Count(); j++)
+                        {
+
+                            for (int ri = 0; ri < answers.h_answers[j].results.Count() + 1; ri++)
+                            {
+                                VASQLDataModel sq = new VASQLDataModel();
+                                string fTimeStr = answers.formatted_update_time;
+                                DateTime fTime = Convert.ToDateTime(fTimeStr);
+
+                                {
+                                    cnt++;
+                                    label2.Text = cnt.ToString();
+
+                                    sq.VA_Data_Id = update;
+                                    sq.race_id = answers.race_id;
+                                    sq.r_type = "A";
+                                    sq.questionId = answers.questionId;
+                                    sq.qcode = answers.qcode;
+                                    sq.question = answers.question;
+                                    sq.q_order = Convert.ToInt32(answers.question_order);
+                                    sq.filter = answers.filter;
+                                    sq.state = answers.state;
+
+                                    if (answers.race_type == "all")
+                                        sq.ofc = "A";
+                                    else
+                                        sq.ofc = answers.race_type;
+
+                                    sq.update_Time = answers.update_Time;
+                                    //sq.f_update_time = DateTime.Now;
+                                    sq.f_update_time = fTime;
+                                    sq.preface = answers.preface;
+                                    sq.pk = answers.pk;
+                                    sq.def = Convert.ToBoolean(answers.def);
+                                    sq.sample_size = Convert.ToInt32(answers.sample_size);
+                                    sq.total_weight = Convert.ToSingle(answers.total_weight);
+                                    sq.variable_count = Convert.ToInt32(answers.h_answers[j].variable_count);
+                                    sq.variable_weight = Convert.ToSingle(answers.h_answers[j].variable_weight);
+                                    sq.variable_percent = Convert.ToInt32(answers.h_answers[j].variable_percent);
+                                    sq.answer = answers.h_answers[j].answer;
+                                    sq.a_order = Convert.ToInt32(answers.h_answers[j].order);
+                                    sq.answer_id = Convert.ToInt32(answers.h_answers[j].answer_id);
+
+                                    if (ri == 0)
+                                    {
+                                        sq.name = string.Empty;
+                                        sq.id = 0;
+                                        sq.result_count = 0;
+                                        sq.result_percent = 0;
+                                        sq.result_weight = 0;
+                                        sq.party = string.Empty;
+                                        sq.result_order = 0;
+
+                                    }
+                                    else
+                                    {
+                                        sq.name = answers.h_answers[j].results[ri - 1].name;
+                                        sq.id = Convert.ToInt32(answers.h_answers[j].results[ri - 1].id);
+                                        sq.result_count = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_count);
+                                        sq.result_percent = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_percent);
+                                        sq.result_weight = Convert.ToSingle(answers.h_answers[j].results[ri - 1].result_weight);
+                                        sq.party = answers.h_answers[j].results[ri - 1].party;
+
+                                        if (sq.name == "Republican" || sq.name == "Democrat")
+                                            sq.party = sq.name.Substring(0, 3);
+
+
+                                        if (sq.party.Length > 3)
+                                            sq.party = sq.party.Substring(0, 3);
+
+
+
+                                        if (int.TryParse(answers.h_answers[j].results[ri - 1].order, out parsedResult))
+                                            sq.result_order = Convert.ToInt32(answers.h_answers[j].results[ri - 1].order);
+                                        else
+                                            sq.result_order = cnt;
+
+                                    }
+                                    sq.stateId = GetStateID(answers.state);
+
+
+                                    if (ri > 0)
+                                        sqm.Add(sq);
+                                }
+                            }
+                        }
+                    }
+
+                    dataGridView1.DataSource = sqm;
+                    DataTable dt = new DataTable();
+                    dt = ListToDataTable<VASQLDataModel>(sqm);
+                    UpdateVADDBNew(dt, fullTick);
+                }
+                else
+                {
+                    listBox2.Items.Add($"Data error for A: {update}");
+                    log.Error($"Data error for A: {update}");
+
+                }
+
+                string url;
+
+                //if (dataType == 1)
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=receipt&id={race}";
+                //else
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=receipt&id={race}";
+
+                int nn = dataType * 2 + 1;
+                url = $"{baseUrl}{stacktype}{stackTypes[nn]}{calltype}{callTypes[2]}{update}";
+
+                string jsonData = SendAPIRequest(url);
+
+
+
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error getting Answer Data: {update}  {ex}");
+
+            }
+
+
+
+        }
+
+
 
     }
 
