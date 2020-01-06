@@ -18,6 +18,7 @@ using System.Globalization;
 using System.Threading;
 using System.Net.Http;
 using log4net.Appender;
+using RestSharp;
 
 
 namespace VoterAnalysisParser
@@ -40,7 +41,10 @@ namespace VoterAnalysisParser
         public string[] stackTypes = new string[5] { "ticker_question", "ticker_answer", "fullscreen_question", "fullscreen_answer", "map" };
         public string[] callTypes = new string[4] { "updates", "data&id=", "receipt&id=", "refresh" };
 
-            
+        public string newapiKey = "u5HPTwm77q2VxbXRUS6KG3UiKlR0FJEd48CTCoJk";
+        public string newbaseUrl = "https://y384o59d2e.execute-api.us-west-2.amazonaws.com/prod";
+                                    
+
         public class StateInfo
         {
             public string stateAbbv { get; set; }
@@ -48,8 +52,10 @@ namespace VoterAnalysisParser
             public int stateID { get; set; }
         }
 
-        private static HttpClient Client = new HttpClient();
-        
+        //public static HttpClient Client = new HttpClient();
+        public static HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "https://y384o59d2e.execute-api.us-west-2.amazonaws.com/prod");
+
+
         public List<StateInfo> stateData = new List<StateInfo>();
         public List<RaceListModel> raceList = new List<RaceListModel>();
 
@@ -67,7 +73,7 @@ namespace VoterAnalysisParser
         public int dataType = 0;
         public int cnt = 0;
 
-        private static readonly HttpClient client = new HttpClient();
+        //private static HttpClient client = new HttpClient();
         public string token = "eyJraWQiOiJnSkZIN25vdjdKWDZmcHFqb1lpVnh1RG92azIzVXJTN0c1eFA0UHQ0VEk4PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJmZGRlOTc0Zi03N2RlLTRjNWMtYWZjOC00ZjhmNjY1YTQyNjYiLCJjb2duaXRvOmdyb3VwcyI6WyJTdGFja1B1c2giLCJTdGFja0VkaXQiLCJRdWFyYW50aW5lQWNjZXNzIiwiVGllcjIiLCJEeW5hbWljUXVlcmllcyIsIlZpZXdUb3RhbHMiLCJIaWRlUUNvZGVzIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9wWkpjbWUxeEYiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiZmRkZTk3NGYtNzdkZS00YzVjLWFmYzgtNGY4ZjY2NWE0MjY2IiwiYXVkIjoidmNncjQ2ajBzZWZpZGI2a212dHQyY2ZyNSIsImV2ZW50X2lkIjoiYTRjNmYyZWUtMmZkYi00ZDdmLWE3ZDEtM2QwZTY4ODVhNGE4IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE1Njc3ODQ2OTQsImV4cCI6MTU2Nzc4ODI5NCwiaWF0IjoxNTY3Nzg0Njk0LCJlbWFpbCI6Im1hdHQuZmFyZ3Vzb25AZm94bmV3cy5jb20ifQ.CjeG05KxL1N-QyJqlOqoSwYG5nRT593vvn7qN-JsPB8nuenvOZSIC0h_G9-Y4nJq20DBpj6dMfBJSba836V_lDNnYbIWZ4vRljURK-wuBUD3FnPaarPD5jlfKrUtxyODW3kpRq7QUUvj1wGKnU3mgnKmTdxuA2pqR_5QR382J5yhNDtD_a_MMlD_iQP-9mc3nDf3r4AeMSArkKTZZ6VjdOFrJe1i4K8DgOtN7lzX9a1JnABku4HPl5JDkMnEaJJifqf6_DIn5ywMhS8KiOSwLX-vW9ET8oWtEuPg6iBj3WU0XpDs0HXpbslCEVIRb3JKH5VbvJj1J5oTe9l73j3jMw";
         public string posturl = "https://d7icrmqr5f.execute-api.us-west-2.amazonaws.com/prod/";
 
@@ -128,13 +134,9 @@ namespace VoterAnalysisParser
             var pw = builder.Password;
 
             lblBaseUrl.Text = baseUrl;
-
             lblDB.Text = $"{dataSource}  {initCat}";
 
-
-            //client.DefaultRequestHeaders.Add("x-api-key", "SpKGNVC1zl8AUolCQu4Qx4khpZiZNreD5hME1gMS");
-            client.DefaultRequestHeaders.Add("x-api-key", apiKey);
-
+            //client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
 
         }
 
@@ -1014,17 +1016,38 @@ namespace VoterAnalysisParser
 
         }
 
-        private string SendAPIPostRequest(string request)
+        private string SendAPIPostRequest(string requestJson)
         {
             var jsonResponse = "";
+            string url = newbaseUrl;
 
             try
             {
-                string url = posturl;
-                var content = new StringContent(request.ToString(), Encoding.UTF8, "application/json");
-                var result = client.PostAsync(url, content).Result;
-                //var result = await client.PostAsync(url, content);
+                HttpClient client = new HttpClient(); 
+                
+                var content = new StringContent(requestJson.ToString(), Encoding.UTF8, "application/json");
+
+                requestMessage.Headers.Add("x-api-key", newapiKey);
+                requestMessage.Content = new StringContent(requestJson.ToString(), Encoding.UTF8, "application/json");
+                
+                client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
+
+
+                //HttpResponseMessage result = client.PostAsync(url, requestMessage.Content).Result;
+                HttpResponseMessage result = client.PostAsync(url, content).Result;
+
                 jsonResponse = result.Content.ReadAsStringAsync().Result;
+
+
+                //var client = new RestClient(newbaseUrl);
+                //client.Timeout = -1;
+                //var request = new RestRequest(Method.POST);
+                //request.AddHeader("x-api-key", newapiKey);
+                //request.AddHeader("Content-Type", "application/json");
+                //request.AddParameter("application/json", requestJson, ParameterType.RequestBody);
+                //IRestResponse response = client.Execute(request);
+                //jsonResponse = response.Content;
+                //    //Console.WriteLine(response.Content);
 
 
             }
@@ -1032,6 +1055,7 @@ namespace VoterAnalysisParser
             {
                 Console.WriteLine(ex.ToString());
             }
+
 
             return jsonResponse;
 
@@ -1056,6 +1080,7 @@ namespace VoterAnalysisParser
 
 
 
+        /*
         static async Task<string> GetAPIDataAsync(string url, string race)
         {
             Task<string> GetAPIData = client.GetStringAsync(url);
@@ -1082,7 +1107,7 @@ namespace VoterAnalysisParser
             
 
         }
-
+        */
 
         private void button4_Click(object sender, EventArgs e)
         {
@@ -2593,15 +2618,14 @@ namespace VoterAnalysisParser
 
         private void button14_Click(object sender, EventArgs e)
         {
+
+            listBox1.Items.Clear();
             VAPostModel test = new VAPostModel();
 
-            test.tk = token;
-            test.apikey = "undefined";
-            test.username = "UNKNOWN";
-            test.request.request_type = "stack";
-            test.request.stack_type = "fullscreen-answer";
-            test.request.method = "updates";
-            test.request.election_event = "2018_Midterms";
+            test.request_type = "stack";
+            test.stack_type = "fullscreen-answer";
+            test.method = "updates";
+            test.election_event = "2018_Midterms";
 
             string JSONrequest = JsonConvert.SerializeObject(test);
 
@@ -2660,6 +2684,7 @@ namespace VoterAnalysisParser
         public void ProcessUpdate(string update)
         {
 
+            tbRace.Text = update;
             // parse the header info
             string[] strSeparator = new string[] { ":" };
             string[] Races;
@@ -2676,14 +2701,11 @@ namespace VoterAnalysisParser
 
             VAPostModel test = new VAPostModel();
 
-            test.tk = token;
-            test.apikey = "undefined";
-            test.username = "UNKNOWN";
-            test.request.request_type = "stack";
-            test.request.stack_type = method;
-            test.request.method = "data";
-            test.request.id = update;
-            test.request.election_event = "2018_Midterms";
+            test.request_type = "stack";
+            test.stack_type = method;
+            test.method = "data";
+            test.id = update;
+            test.election_event = "2018_Midterms";
 
             string JSONrequest = JsonConvert.SerializeObject(test);
 
@@ -2719,14 +2741,11 @@ namespace VoterAnalysisParser
 
             VAPostModel test = new VAPostModel();
 
-            test.tk = token;
-            test.apikey = "undefined";
-            test.username = "UNKNOWN";
-            test.request.request_type = "stack";
-            test.request.stack_type = method;
-            test.request.method = "receipt";
-            test.request.id = update;
-            test.request.election_event = "2018_Midterms";
+            test.request_type = "stack";
+            test.stack_type = method;
+            test.method = "receipt";
+            test.id = update;
+            test.election_event = "2018_Midterms";
 
             string JSONrequest = JsonConvert.SerializeObject(test);
 
