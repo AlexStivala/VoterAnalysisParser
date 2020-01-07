@@ -62,7 +62,9 @@
     <Compile Include="API_Params.cs" />
     <Compile Include="MapDataModel.cs" />
     <Compile Include="MapSQLModel.cs" />
+    <Compile Include="VAAnswerModelNew.cs" />
     <Compile Include="VAPostModel.cs" />
+    <Compile Include="VAQuestionModelNew.cs" />
     <Compile Include="VASQLDataModel.cs" />
     <Compile Include="VAAnswerModel.cs" />
     <Compile Include="VAQuestionModel.cs" />

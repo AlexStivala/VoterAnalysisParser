@@ -133,7 +133,8 @@ namespace VoterAnalysisParser
             var user = builder.UserID;
             var pw = builder.Password;
 
-            lblBaseUrl.Text = baseUrl;
+            //lblBaseUrl.Text = baseUrl;
+            lblBaseUrl.Text = newbaseUrl;
             lblDB.Text = $"{dataSource}  {initCat}";
 
             //client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
@@ -2618,12 +2619,13 @@ namespace VoterAnalysisParser
 
         private void button14_Click(object sender, EventArgs e)
         {
-
+            int type = 0;
             listBox1.Items.Clear();
             VAPostModel test = new VAPostModel();
 
             test.request_type = "stack";
-            test.stack_type = "fullscreen-answer";
+            //test.stack_type = "fullscreen-answer";
+            test.stack_type = "fullscreen-question";
             test.method = "updates";
             test.election_event = "2018_Midterms";
 
@@ -2662,10 +2664,20 @@ namespace VoterAnalysisParser
                     pos = Races[i].IndexOf("|");
                     deleteStr = Races[i].Substring(pos + 1);
                     Races[i] = Races[i].Substring(0, pos);
-                    if (deleteStr == "delete")
-                        QuestionDeletes.Add(Races[i]);
-                    else if (deleteStr == "create")
-                        QuestionUpdates.Add(Races[i]);
+                    if (type == 0)
+                    {
+                        if (deleteStr == "delete")
+                            QuestionDeletes.Add(Races[i]);
+                        else if (deleteStr == "create")
+                            QuestionUpdates.Add(Races[i]);
+                    }
+                    else if (type == 1)
+                    {
+                        if (deleteStr == "delete")
+                            AnswerDeletes.Add(Races[i]);
+                        else if (deleteStr == "create")
+                            AnswerUpdates.Add(Races[i]);
+                    }
                 }
             }
 
@@ -2762,14 +2774,14 @@ namespace VoterAnalysisParser
 
                 //string json = textBox1.Text;
 
-                VAQuestionModel questions = new VAQuestionModel();
+                VAQuestionModelNew questions = new VAQuestionModelNew();
 
                 string err = "stackTrace";
                 int pos = json.IndexOf(err);
                 if (pos == -1)
                 {
 
-                    questions = JsonConvert.DeserializeObject<VAQuestionModel>(json);
+                    questions = JsonConvert.DeserializeObject<VAQuestionModelNew>(json);
 
 
                     List<VASQLDataModel> sqm = new List<VASQLDataModel>();
@@ -2797,40 +2809,40 @@ namespace VoterAnalysisParser
 
 
                                     sq.VA_Data_Id = update;
-                                    sq.race_id = questions.race_id;
                                     sq.r_type = "Q";
-                                    sq.questionId = questions.questionId;
-                                    sq.qcode = questions.qcode;
-                                    sq.question = questions.question;
                                     sq.q_order = Convert.ToInt32(questions.question_order);
-                                    sq.filter = questions.filter;
+                                    sq.questionId = questions.questionId;
                                     sq.state = questions.state;
-
+                                    sq.race_id = questions.race_id;
+                                    sq.question = questions.question;
                                     if (questions.race_type == "all")
                                         sq.ofc = "A";
                                     else
                                         sq.ofc = questions.race_type;
-
-                                    sq.update_Time = questions.update_Time;
-                                    sq.f_update_time = fTime;
-                                    sq.preface = questions.preface;
-                                    sq.pk = questions.pk;
-                                    sq.def = Convert.ToBoolean(questions.def);
+                                    sq.qcode = questions.qcode;
+                                    sq.filter = questions.filter;
                                     sq.sample_size = Convert.ToInt32(questions.sample_size);
                                     sq.total_weight = Convert.ToSingle(questions.total_weight);
-                                    sq.variable_count = Convert.ToInt32(questions.h_answers[j].variable_count);
+                                    sq.def = Convert.ToBoolean(questions.def);
+                                    sq.preface = questions.preface;
+                                    sq.pk = questions.header; // change
+
                                     sq.variable_weight = Convert.ToSingle(questions.h_answers[j].variable_weight);
+                                    sq.variable_count = Convert.ToInt32(questions.h_answers[j].variable_count);
                                     sq.variable_percent = Convert.ToInt32(questions.h_answers[j].variable_percent);
-                                    sq.answer = questions.h_answers[j].answer;
-                                    sq.a_order = Convert.ToInt32(questions.h_answers[j].order);
-                                    sq.answer_id = Convert.ToInt32(questions.h_answers[j].answer_id);
-                                    sq.name = string.Empty;
+                                    sq.a_order = Convert.ToInt32(questions.h_answers[j].original_order); // change
+                                    sq.name = questions.h_answers[j].original_name; //
+
+                                    //sq.answer = questions.h_answers[j].answer;
+                                    //sq.answer_id = Convert.ToInt32(questions.h_answers[j].answer_id);
                                     sq.id = 0;
                                     sq.result_count = 0;
                                     sq.result_percent = 0;
                                     sq.result_weight = 0;
                                     sq.party = string.Empty;
                                     sq.stateId = GetStateID(questions.state);
+                                    sq.update_Time = questions.update_Time;
+                                    sq.f_update_time = fTime;
 
 
                                     sqm.Add(sq);
@@ -2935,14 +2947,14 @@ namespace VoterAnalysisParser
 
                 //string json = textBox1.Text;
 
-                VAAnswerModel answers = new VAAnswerModel();
+                VAAnswerModelNew answers = new VAAnswerModelNew();
 
                 string err = "stackTrace";
                 int pos = json.IndexOf(err);
                 if (pos == -1)
                 {
 
-                    answers = JsonConvert.DeserializeObject<VAAnswerModel>(json);
+                    answers = JsonConvert.DeserializeObject<VAAnswerModelNew>(json);
 
                     List<VASQLDataModel> sqm = new List<VASQLDataModel>();
 
@@ -2968,33 +2980,42 @@ namespace VoterAnalysisParser
                                     label2.Text = cnt.ToString();
 
                                     sq.VA_Data_Id = update;
-                                    sq.race_id = answers.race_id;
                                     sq.r_type = "A";
-                                    sq.questionId = answers.questionId;
-                                    sq.qcode = answers.qcode;
-                                    sq.question = answers.question;
                                     sq.q_order = Convert.ToInt32(answers.question_order);
-                                    sq.filter = answers.filter;
+                                    sq.questionId = answers.questionId;
                                     sq.state = answers.state;
-
+                                    sq.race_id = answers.race_id;
+                                    sq.question = answers.question;
                                     if (answers.race_type == "all")
                                         sq.ofc = "A";
                                     else
                                         sq.ofc = answers.race_type;
+                                    sq.qcode = answers.qcode;
+                                    sq.filter = answers.filter;
+                                    sq.sample_size = Convert.ToInt32(answers.sample_size);
+                                    sq.total_weight = Convert.ToSingle(answers.total_weight);
+                                    sq.def = Convert.ToBoolean(answers.def);
+                                    sq.preface = answers.preface;
+                                    sq.pk = answers.header; // change
+
+
+                                    sq.variable_weight = Convert.ToSingle(answers.h_answers[j].variable_weight);
+                                    sq.variable_count = Convert.ToInt32(answers.h_answers[j].variable_count);
+                                    sq.variable_percent = Convert.ToInt32(answers.h_answers[j].variable_percent);
+                                    sq.a_order = Convert.ToInt32(answers.h_answers[j].original_order);// change
+
+                                    if (int.TryParse(answers.h_answers[j].results[ri - 1].order, out parsedResult))
+                                        sq.result_order = Convert.ToInt32(answers.h_answers[j].results[ri - 1].order);
+                                    else
+                                        sq.result_order = cnt;
+
+
+
 
                                     sq.update_Time = answers.update_Time;
                                     //sq.f_update_time = DateTime.Now;
                                     sq.f_update_time = fTime;
-                                    sq.preface = answers.preface;
-                                    sq.pk = answers.pk;
-                                    sq.def = Convert.ToBoolean(answers.def);
-                                    sq.sample_size = Convert.ToInt32(answers.sample_size);
-                                    sq.total_weight = Convert.ToSingle(answers.total_weight);
-                                    sq.variable_count = Convert.ToInt32(answers.h_answers[j].variable_count);
-                                    sq.variable_weight = Convert.ToSingle(answers.h_answers[j].variable_weight);
-                                    sq.variable_percent = Convert.ToInt32(answers.h_answers[j].variable_percent);
                                     sq.answer = answers.h_answers[j].answer;
-                                    sq.a_order = Convert.ToInt32(answers.h_answers[j].order);
                                     sq.answer_id = Convert.ToInt32(answers.h_answers[j].answer_id);
 
                                     if (ri == 0)
@@ -3010,26 +3031,18 @@ namespace VoterAnalysisParser
                                     }
                                     else
                                     {
-                                        sq.name = answers.h_answers[j].results[ri - 1].name;
-                                        sq.id = Convert.ToInt32(answers.h_answers[j].results[ri - 1].id);
+                                        sq.result_weight = Convert.ToSingle(answers.h_answers[j].results[ri - 1].result_weight);
                                         sq.result_count = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_count);
                                         sq.result_percent = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_percent);
-                                        sq.result_weight = Convert.ToSingle(answers.h_answers[j].results[ri - 1].result_weight);
+                                        sq.name = answers.h_answers[j].results[ri - 1].original_name;
+                                        sq.id = Convert.ToInt32(answers.h_answers[j].results[ri - 1].id);
                                         sq.party = answers.h_answers[j].results[ri - 1].party;
 
                                         if (sq.name == "Republican" || sq.name == "Democrat")
                                             sq.party = sq.name.Substring(0, 3);
 
-
                                         if (sq.party.Length > 3)
                                             sq.party = sq.party.Substring(0, 3);
-
-
-
-                                        if (int.TryParse(answers.h_answers[j].results[ri - 1].order, out parsedResult))
-                                            sq.result_order = Convert.ToInt32(answers.h_answers[j].results[ri - 1].order);
-                                        else
-                                            sq.result_order = cnt;
 
                                     }
                                     sq.stateId = GetStateID(answers.state);
