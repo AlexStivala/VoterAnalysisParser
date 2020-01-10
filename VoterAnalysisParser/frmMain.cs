@@ -2624,8 +2624,10 @@ namespace VoterAnalysisParser
             VAPostModel test = new VAPostModel();
 
             test.request_type = "stack";
-            //test.stack_type = "fullscreen-answer";
-            test.stack_type = "fullscreen-question";
+            if (rbA.Checked)
+                test.stack_type = "fullscreen-answer";
+            if (rbQ.Checked)
+                test.stack_type = "fullscreen-question";
             test.method = "updates";
             test.election_event = "2018_Midterms";
 
@@ -2664,14 +2666,14 @@ namespace VoterAnalysisParser
                     pos = Races[i].IndexOf("|");
                     deleteStr = Races[i].Substring(pos + 1);
                     Races[i] = Races[i].Substring(0, pos);
-                    if (type == 0)
+                    if (rbQ.Checked)
                     {
                         if (deleteStr == "delete")
                             QuestionDeletes.Add(Races[i]);
                         else if (deleteStr == "create")
                             QuestionUpdates.Add(Races[i]);
                     }
-                    else if (type == 1)
+                    else if (rbA.Checked)
                     {
                         if (deleteStr == "delete")
                             AnswerDeletes.Add(Races[i]);
@@ -2686,9 +2688,21 @@ namespace VoterAnalysisParser
 
         private void button15_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < QuestionUpdates.Count; i++)
+
+            int n = 0;
+            if (rbQ.Checked)
+                n = QuestionUpdates.Count;
+            if (rbA.Checked)
+                n = AnswerUpdates.Count;
+
+
+            for (int i = 0; i < n; i++)
             {
-                ProcessUpdate(QuestionUpdates[i]);
+
+                if (rbA.Checked)
+                    ProcessUpdate(AnswerUpdates[i]);
+                if (rbQ.Checked)
+                    ProcessUpdate(QuestionUpdates[i]);
             }
             
         }
@@ -3004,19 +3018,20 @@ namespace VoterAnalysisParser
                                     sq.variable_percent = Convert.ToInt32(answers.h_answers[j].variable_percent);
                                     sq.a_order = Convert.ToInt32(answers.h_answers[j].original_order);// change
 
+                                    /*
                                     if (int.TryParse(answers.h_answers[j].results[ri - 1].order, out parsedResult))
                                         sq.result_order = Convert.ToInt32(answers.h_answers[j].results[ri - 1].order);
                                     else
                                         sq.result_order = cnt;
-
+                                        */
 
 
 
                                     sq.update_Time = answers.update_Time;
                                     //sq.f_update_time = DateTime.Now;
                                     sq.f_update_time = fTime;
-                                    sq.answer = answers.h_answers[j].answer;
-                                    sq.answer_id = Convert.ToInt32(answers.h_answers[j].answer_id);
+                                    //sq.answer = answers.h_answers[j].answer;
+                                    //sq.answer_id = Convert.ToInt32(answers.h_answers[j].answer_id);
 
                                     if (ri == 0)
                                     {
@@ -3036,6 +3051,8 @@ namespace VoterAnalysisParser
                                         sq.result_percent = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_percent);
                                         sq.name = answers.h_answers[j].results[ri - 1].original_name;
                                         sq.id = Convert.ToInt32(answers.h_answers[j].results[ri - 1].id);
+
+
                                         sq.party = answers.h_answers[j].results[ri - 1].party;
 
                                         if (sq.name == "Republican" || sq.name == "Democrat")
@@ -3085,15 +3102,39 @@ namespace VoterAnalysisParser
             catch (Exception ex)
             {
                 log.Error($"Error getting Answer Data: {update}  {ex}");
-
             }
-
-
-
         }
 
+        private void button16_Click(object sender, EventArgs e)
+        {
+            int type = 0;
+            listBox1.Items.Clear();
+            VAPostModel test = new VAPostModel();
 
+            for (int i = 0; i < 2; i++)
+            {
+                test.request_type = "stack";
+                if (i == 0)
+                    test.stack_type = "fullscreen-answer";
+                if (i == 1)
+                    test.stack_type = "fullscreen-question";
+                test.method = "refresh";
+                test.election_event = "2018_Midterms";
 
+                string JSONrequest = JsonConvert.SerializeObject(test);
+
+                string result = SendAPIPostRequest(JSONrequest);
+
+                textBox1.Text = result;
+
+                string jsonData = result;
+            }
+        }
+
+        private void rbFS_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
 }
