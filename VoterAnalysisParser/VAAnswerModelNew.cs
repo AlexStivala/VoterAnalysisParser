@@ -22,7 +22,9 @@ namespace VoterAnalysisParser
         public string preface { get; set; }
         public string header { get; set; }
         public string formatted_update_time { get; set; }
-        public string update_Time { get; set; }
+        public string last_updated { get; set; }
+        public string election_event { get; set; }
+
         public Answer[] h_answers { get; set; }
 
         public class Answer
