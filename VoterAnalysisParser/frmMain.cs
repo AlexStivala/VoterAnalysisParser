@@ -23,6 +23,9 @@ using RestSharp;
 
 namespace VoterAnalysisParser
 {
+    public delegate void ListErr(string s);
+    public delegate void TextWrite(string s);
+
     public partial class frmMain : Form , IAppender
     {
 
@@ -68,6 +71,7 @@ namespace VoterAnalysisParser
         public List<string> MapDeletes = new List<string>();
 
         public List<string> msgs = new List<string>();
+        public string runStop = "Start";
 
 
         public int dataType = 0;
@@ -814,6 +818,7 @@ namespace VoterAnalysisParser
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            btnRunStop.Text = runStop;
             getStateInfo();
         }
 
@@ -2707,11 +2712,10 @@ namespace VoterAnalysisParser
             }
             
         }
-
         public void ProcessUpdate(string update)
         {
 
-            tbRace.Text = update;
+            //tbRace.Text = update;
             // parse the header info
             string[] strSeparator = new string[] { ":" };
             string[] Races;
@@ -2740,8 +2744,11 @@ namespace VoterAnalysisParser
 
             string result = SendAPIPostRequest(JSONrequest);
             string jsonData = result;
-            textBox1.Text = result;
-
+            if (this.InvokeRequired)
+                this.Invoke(new TextWrite(writeTextbox), result);
+            else
+                textBox1.Text = result;
+            
             string err = "stackTrace";
             int pos = jsonData.IndexOf(err);
             if (pos >= 0)
@@ -2782,7 +2789,10 @@ namespace VoterAnalysisParser
 
             string result = SendAPIPostRequest(JSONrequest);
             string jsonData = result;
-            textBox1.Text = result;
+            if (this.InvokeRequired)
+                this.Invoke(new TextWrite(writeTextbox), result);
+            else
+                textBox1.Text = result;
             
         }
 
@@ -2809,11 +2819,11 @@ namespace VoterAnalysisParser
                         VASQLDataModelNew sq = new VASQLDataModelNew();
 
                         cnt++;
-                        label2.Text = cnt.ToString();
+                        //label2.Text = cnt.ToString();
 
                         sq.VA_Data_Id = update;
                         sq.r_type = "Q";
-                        sq.q_order = questions.q_order;
+                        sq.q_order = questions.question_order;
                         sq.questionId = questions.questionId;
                         sq.st = questions.State;
                         sq.State = questions.preface;
@@ -2854,7 +2864,7 @@ namespace VoterAnalysisParser
 
                     }
 
-                    dataGridView1.DataSource = sqm;
+                    //dataGridView1.DataSource = sqm;
                     DataTable dt = new DataTable();
                     dt = ListToDataTable(sqm);
                     UpdateVADDBNew(dt, fullTick);
@@ -3003,7 +3013,7 @@ namespace VoterAnalysisParser
                             sq.original_name = answers.h_answers[j].original_name;
 
                             cnt++;
-                            label2.Text = cnt.ToString();
+                            //label2.Text = cnt.ToString();
 
                             if (ri == 0)
                             {
@@ -3046,14 +3056,14 @@ namespace VoterAnalysisParser
                         }
                     }
 
-                    dataGridView1.DataSource = sqm;
+                    //dataGridView1.DataSource = sqm;
                     DataTable dt = new DataTable();
                     dt = ListToDataTable(sqm);
                     UpdateVADDBNew(dt, fullTick);
                 }
                 else
                 {
-                    listBox2.Items.Add($"Data error for A: {update}");
+                    //listBox2.Items.Add($"Data error for A: {update}");
                     log.Error($"Data error for A: {update}");
 
                 }
@@ -3099,6 +3109,232 @@ namespace VoterAnalysisParser
         {
 
         }
+
+        private void button17_Click(object sender, EventArgs e)
+        {
+
+            if (runStop == "Start")
+            {
+                runStop = "Stop";
+                btnRunStop.Text = runStop;
+                Task.Run(() => GetAllNew());
+            }
+            else
+            {
+                runStop = "Start";
+                btnRunStop.Text = runStop;
+            }
+
+
+
+        }
+
+        public void GetAllNew()
+        {
+            int type = 0;
+
+            while (runStop == "Stop")
+            {
+                if (this.InvokeRequired)
+                    this.Invoke(new ListErr(writeListbox), "!#");
+                else
+                    listBox1.Items.Add("!#");
+
+                if (this.InvokeRequired)
+                    this.Invoke(new TextWrite(writeTextbox), "Checking for data.......");
+                else
+                    textBox1.Text = "Checking for data.......";
+
+
+
+                VAPostModel test = new VAPostModel();
+
+
+                if (type % 2 == 0)
+                    test.stack_type = "fullscreen-question";
+                else
+                    test.stack_type = "fullscreen-answer";
+
+                test.request_type = "stack";
+                test.method = "updates";
+                //test.election_event = "2018_Midterms";
+                test.election_event = "2020_Primaries";
+
+                string JSONrequest = JsonConvert.SerializeObject(test);
+
+                string result = SendAPIPostRequest(JSONrequest);
+
+                if (this.InvokeRequired)
+                    this.Invoke(new TextWrite(writeTextbox), result);
+                else
+                    textBox1.Text = result;
+
+                string jsonData = result;
+
+                if (jsonData.Length > 1 && jsonData != "[]")
+                {
+                    string racesWithData = jsonData.Replace("\"", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace("[", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace("]", "");
+                    jsonData = racesWithData;
+                    racesWithData = jsonData.Replace(" ", "");
+
+
+                    // parse the header info
+                    string[] strSeparator = new string[] { "," };
+                    string[] Races;
+
+                    // this takes the header and splits it into key-value pairs
+                    Races = racesWithData.Split(strSeparator, StringSplitOptions.None);
+                    int pos;
+                    string deleteStr;
+                    string updateType = "";
+                    QuestionDeletes.Clear();
+                    AnswerDeletes.Clear();
+                    QuestionUpdates.Clear();
+                    AnswerUpdates.Clear();
+
+
+                    for (int i = 0; i < Races.Length; i++)
+                    {
+
+
+                        if (this.InvokeRequired)
+                            this.Invoke(new ListErr(writeListbox), Races[i]);
+                        else
+                            listBox1.Items.Add(Races[i]);
+
+
+                        pos = Races[i].IndexOf("|");
+                        deleteStr = Races[i].Substring(pos + 1);
+                        Races[i] = Races[i].Substring(0, pos);
+                        if (type % 2 == 0)
+                        {
+                            if (deleteStr == "delete")
+                                QuestionDeletes.Add(Races[i]);
+                            else if (deleteStr == "create")
+                                QuestionUpdates.Add(Races[i]);
+                            updateType = "Q";
+                        }
+                        else
+                        {
+                            if (deleteStr == "delete")
+                                AnswerDeletes.Add(Races[i]);
+                            else if (deleteStr == "create")
+                                AnswerUpdates.Add(Races[i]);
+                            updateType = "A";
+                        }
+                    }
+
+                    if (Races.Length > 0)
+                        ProcessUpdatesNew(updateType);
+
+                    
+                }
+                else
+                {
+                    if (this.InvokeRequired)
+                        this.Invoke(new TextWrite(writeTextbox), $"No new {test.stack_type}s.");
+                    else
+                        textBox1.Text = $"No new {test.stack_type}s.";
+
+                }
+                Thread.Sleep(2000);
+                type++;
+
+            }
+        }
+
+        public void ProcessUpdatesNew(string updateType)
+        {
+            int n = 0;
+            if (updateType == "Q")
+            {
+                // process all questions
+                n = QuestionUpdates.Count;
+                for (int i = 0; i < n; i++)
+                    ProcessUpdate(QuestionUpdates[i]);
+
+                // process all question deletes
+                n = QuestionDeletes.Count;
+                for (int i = 0; i < n; i++)
+                    DeleteDataNew(QuestionDeletes[i]);
+            }
+            else
+            {
+                // process all answers
+                n = AnswerUpdates.Count;
+                for (int i = 0; i < n; i++)
+                    ProcessUpdate(AnswerUpdates[i]);
+
+                // process all answer deletes
+                n = AnswerDeletes.Count;
+                for (int i = 0; i < n; i++)
+                    DeleteDataNew(AnswerDeletes[i]);
+            }
+            
+
+        }
+
+        public void writeListbox(string s)
+        {
+            if (s == "!#")
+                listBox1.Items.Clear();
+            else
+                listBox1.Items.Add(s);
+        }
+
+        public void writeTextbox(string s)
+        {
+            textBox1.Text = s;
+        }
+
+        public void DeleteDataNew(string update)
+        {
+
+            try
+            {
+                string[] strSeparator = new string[] { ":" };
+                string[] Races;
+
+                // this takes the header and splits it into key-value pairs
+                Races = update.Split(strSeparator, StringSplitOptions.None);
+                string method = Races[3];
+
+                strSeparator = new string[] { "-" };
+                string[] qa;
+                qa = method.Split(strSeparator, StringSplitOptions.None);
+                string fullTick = qa[0];
+                string faq = qa[1];
+
+                string tblName = "FE_VoterAnalysisData_TKR_New";
+
+                if (dataType == 1)
+                    tblName = "FE_VoterAnalysisData_FS_New";
+
+                //if (QnA == "M")
+                    //tblName = "FE_VoterAnalysisData_Map";
+
+
+                string delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
+                IssueSQLCmd(delCmd);
+
+                SendReceipt(update);
+
+
+
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Delete Error: {update} {ex}");
+
+            }
+
+        }
+
+
     }
 
 }

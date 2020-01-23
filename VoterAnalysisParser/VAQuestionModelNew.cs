@@ -14,7 +14,7 @@ namespace VoterAnalysisParser
         public string qcode { get; set; }
         public string filter { get; set; }
         public string questionId { get; set; }
-        public int q_order { get; set; }
+        public int question_order { get; set; }
         public string question { get; set; }
         public string race_type { get; set; }
         public string st { get; set; }

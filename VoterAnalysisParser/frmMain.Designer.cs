@@ -72,6 +72,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.rbA = new System.Windows.Forms.RadioButton();
             this.rbQ = new System.Windows.Forms.RadioButton();
+            this.btnRunStop = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -552,12 +553,25 @@
             this.rbQ.Text = "Question";
             this.rbQ.UseVisualStyleBackColor = true;
             // 
+            // btnRunStop
+            // 
+            this.btnRunStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRunStop.Location = new System.Drawing.Point(1670, 1142);
+            this.btnRunStop.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnRunStop.Name = "btnRunStop";
+            this.btnRunStop.Size = new System.Drawing.Size(238, 83);
+            this.btnRunStop.TabIndex = 146;
+            this.btnRunStop.Text = "Start";
+            this.btnRunStop.UseVisualStyleBackColor = true;
+            this.btnRunStop.Click += new System.EventHandler(this.button17_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(3079, 1305);
+            this.Controls.Add(this.btnRunStop);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.button16);
             this.Controls.Add(this.button15);
@@ -650,6 +664,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.RadioButton rbA;
         private System.Windows.Forms.RadioButton rbQ;
+        private System.Windows.Forms.Button btnRunStop;
     }
 }
 
