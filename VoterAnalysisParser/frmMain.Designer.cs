@@ -73,6 +73,7 @@
             this.rbA = new System.Windows.Forms.RadioButton();
             this.rbQ = new System.Windows.Forms.RadioButton();
             this.btnRunStop = new System.Windows.Forms.Button();
+            this.rbMan = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -520,12 +521,13 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.rbMan);
             this.groupBox2.Controls.Add(this.rbA);
             this.groupBox2.Controls.Add(this.rbQ);
             this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(552, 1131);
+            this.groupBox2.Location = new System.Drawing.Point(552, 1089);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(187, 118);
+            this.groupBox2.Size = new System.Drawing.Size(187, 158);
             this.groupBox2.TabIndex = 145;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Update Type";
@@ -533,7 +535,7 @@
             // rbA
             // 
             this.rbA.AutoSize = true;
-            this.rbA.Location = new System.Drawing.Point(31, 82);
+            this.rbA.Location = new System.Drawing.Point(31, 77);
             this.rbA.Name = "rbA";
             this.rbA.Size = new System.Drawing.Size(109, 29);
             this.rbA.TabIndex = 1;
@@ -552,6 +554,7 @@
             this.rbQ.TabStop = true;
             this.rbQ.Text = "Question";
             this.rbQ.UseVisualStyleBackColor = true;
+            this.rbQ.CheckedChanged += new System.EventHandler(this.rbQ_CheckedChanged);
             // 
             // btnRunStop
             // 
@@ -564,6 +567,17 @@
             this.btnRunStop.Text = "Start";
             this.btnRunStop.UseVisualStyleBackColor = true;
             this.btnRunStop.Click += new System.EventHandler(this.button17_Click);
+            // 
+            // rbMan
+            // 
+            this.rbMan.AutoSize = true;
+            this.rbMan.Location = new System.Drawing.Point(31, 117);
+            this.rbMan.Name = "rbMan";
+            this.rbMan.Size = new System.Drawing.Size(108, 29);
+            this.rbMan.TabIndex = 2;
+            this.rbMan.TabStop = true;
+            this.rbMan.Text = "Manual";
+            this.rbMan.UseVisualStyleBackColor = true;
             // 
             // frmMain
             // 
@@ -665,6 +679,7 @@
         private System.Windows.Forms.RadioButton rbA;
         private System.Windows.Forms.RadioButton rbQ;
         private System.Windows.Forms.Button btnRunStop;
+        private System.Windows.Forms.RadioButton rbMan;
     }
 }
 

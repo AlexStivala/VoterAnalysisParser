@@ -65,10 +65,12 @@ namespace VoterAnalysisParser
         public List<string> QuestionUpdates = new List<string>();
         public List<string> AnswerUpdates = new List<string>();
         public List<string> MapUpdates = new List<string>();
+        public List<string> ManualUpdates = new List<string>();
 
         public List<string> QuestionDeletes = new List<string>();
         public List<string> AnswerDeletes = new List<string>();
         public List<string> MapDeletes = new List<string>();
+        public List<string> ManualDeletes = new List<string>();
 
         public List<string> msgs = new List<string>();
         public string runStop = "Start";
@@ -849,6 +851,15 @@ namespace VoterAnalysisParser
                     return stateData[i].stateID;
             }
             return -1;
+        }
+        public string GetStateAbbv(string state)
+        {
+            for (int i = 0; i < stateData.Count; i++)
+            {
+                if (stateData[i].stateName == state)
+                    return stateData[i].stateAbbv;
+            }
+            return "";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -2628,11 +2639,23 @@ namespace VoterAnalysisParser
             listBox1.Items.Clear();
             VAPostModel test = new VAPostModel();
 
-            test.request_type = "stack";
             if (rbA.Checked)
+            {
                 test.stack_type = "fullscreen-answer";
+                test.request_type = "stack";
+            }
             if (rbQ.Checked)
+            {
                 test.stack_type = "fullscreen-question";
+                test.request_type = "stack";
+            }
+            if (rbMan.Checked)
+            {
+                test.stack_type = "";
+                test.request_type = "manual";
+            }
+
+
             test.method = "updates";
             //test.election_event = "2018_Midterms";
             test.election_event = "2020_Primaries";
@@ -2686,6 +2709,13 @@ namespace VoterAnalysisParser
                         else if (deleteStr == "create")
                             AnswerUpdates.Add(Races[i]);
                     }
+                    else if (rbMan.Checked)
+                    {
+                        if (deleteStr == "delete")
+                            ManualDeletes.Add(Races[i]);
+                        else if (deleteStr == "create")
+                            ManualUpdates.Add(Races[i]);
+                    }
                 }
             }
 
@@ -2700,21 +2730,25 @@ namespace VoterAnalysisParser
                 n = QuestionUpdates.Count;
             if (rbA.Checked)
                 n = AnswerUpdates.Count;
+            if (rbMan.Checked)
+                n = ManualUpdates.Count;
 
 
             for (int i = 0; i < n; i++)
             {
-
                 if (rbA.Checked)
                     ProcessUpdate(AnswerUpdates[i]);
                 if (rbQ.Checked)
                     ProcessUpdate(QuestionUpdates[i]);
+                if (rbMan.Checked)
+                    ProcessUpdate(ManualUpdates[i]);
             }
             
         }
         public void ProcessUpdate(string update)
         {
-
+            string fullTick = "";
+            string faq = "";
             //tbRace.Text = update;
             // parse the header info
             string[] strSeparator = new string[] { ":" };
@@ -2722,23 +2756,47 @@ namespace VoterAnalysisParser
 
             // this takes the header and splits it into key-value pairs
             Races = update.Split(strSeparator, StringSplitOptions.None);
-            string method = Races[3];
+            int iSplit = Races.Length;
+            string method = "";
+
+            if (iSplit >= 4)
+                method = Races[3];
+            else
+                method = "manual";
 
             strSeparator = new string[] { "-" };
             string[] qa;
             qa = method.Split(strSeparator, StringSplitOptions.None);
-            string fullTick = qa[0];
-            string faq = qa[1];
+            if (qa[0] == "manual")
+            {
+                fullTick = "manual";
+                faq = "manual";
+            }
+            else
+            {
+                fullTick = qa[0];
+                faq = qa[1];
+            }
 
             VAPostModel test = new VAPostModel();
 
-            test.request_type = "stack";
-            test.stack_type = method;
-            test.method = "data";
-            test.id = update;
-            //test.election_event = "2018_Midterms";
-            test.election_event = "2020_Primaries";
+            if (faq == "manual")
+            {
+                test.request_type = "manual";
+                test.stack_type = "";
+                test.method = "data";
+                test.id = update;
+                test.election_event = "2020_Primaries";
 
+            }
+            else
+            {
+                test.request_type = "stack";
+                test.stack_type = method;
+                test.method = "data";
+                test.id = update;
+                test.election_event = "2020_Primaries";
+            }
 
             string JSONrequest = JsonConvert.SerializeObject(test);
 
@@ -2762,6 +2820,8 @@ namespace VoterAnalysisParser
                     ProcessAnswerDataNew(jsonData, update, fullTick);
                 else if (faq == "question")
                     ProcessQuestionDataNew(jsonData, update, fullTick);
+                else if (faq == "manual")
+                    ProcessManualDataNew(jsonData, update, fullTick);
             }
         }
 
@@ -2795,6 +2855,37 @@ namespace VoterAnalysisParser
                 textBox1.Text = result;
             
         }
+
+        public void SendManualReceipt(string update)
+        {
+            // parse the header info
+            string[] strSeparator = new string[] { ":" };
+            string[] Races;
+
+            // this takes the header and splits it into key-value pairs
+            //Races = update.Split(strSeparator, StringSplitOptions.None);
+            //string method = Races[3];
+
+            VAPostModel test = new VAPostModel();
+
+            test.request_type = "manual";
+            test.stack_type = "";
+            test.method = "receipt";
+            test.id = update;
+            test.election_event = "2020_Primaries";
+
+
+            string JSONrequest = JsonConvert.SerializeObject(test);
+
+            string result = SendAPIPostRequest(JSONrequest);
+            string jsonData = result;
+            if (this.InvokeRequired)
+                this.Invoke(new TextWrite(writeTextbox), result);
+            else
+                textBox1.Text = result;
+
+        }
+
 
         public void ProcessQuestionDataNew(string json, string update, string fullTick)
         {
@@ -2886,12 +2977,100 @@ namespace VoterAnalysisParser
             }
         }
 
+        public void ProcessManualDataNew(string json, string update, string fullTick)
+        {
+            try
+            {
+                VAManualModelNew manual = new VAManualModelNew();
+
+
+                if (json == "[]")
+                {
+                    SendManualReceipt(update);
+                    return;
+                }
+
+                string err = "stackTrace";
+                int pos = json.IndexOf(err);
+                if (pos == -1)
+                {
+                    manual = JsonConvert.DeserializeObject<VAManualModelNew>(json);
+
+                    List<VASQLManualDataModelNew> sqm = new List<VASQLManualDataModelNew>();
+
+                    int cnt = 0;
+                    int n = manual.answers.Count() + 1;
+
+                    for (int j = 0; j < manual.answers.Count(); j++)
+                    {
+
+                        VASQLManualDataModelNew sq = new VASQLManualDataModelNew();
+
+                        cnt++;
+                        //label2.Text = cnt.ToString();
+
+                        sq.VA_Data_Id = update;
+                        sq.r_type = "M";
+                        sq.qcode = manual.qcode;
+                        sq.question = manual.question;
+                        sq.st = GetStateAbbv(manual.State.ToUpper());
+                        sq.State = manual.State.ToUpper();
+                        sq.race = manual.race;
+                        sq.race_type = "P";
+
+                        if (sq.race_type == "all")
+                            sq.ofc = "A";
+                        else
+                            sq.ofc = sq.race_type;
+
+                        sq.label = manual.label;
+                        sq.text = manual.answers[j].text;
+                        sq.value = manual.answers[j].value;
+                        sq.order = j + 1;
+
+                        sq.updated = manual.last_updated;
+                        sq.election_event = manual.election_event;
+
+
+                        sq.active = manual.active;
+                        sq.status = manual.status;
+                        
+                        sqm.Add(sq);
+
+                    }
+
+                    DataTable dt = new DataTable();
+                    dt = ListToDataTable(sqm);
+                    UpdateVADDBNew(dt, fullTick);
+
+                }
+                else
+                {
+                    listBox2.Items.Add($"Data error for MAN: {update}");
+                    log.Error($"Data error for MAN: {update}");
+                }
+
+                SendManualReceipt(update);
+
+
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error processing Question Data: {update}  {ex}");
+            }
+        }
+
+
+
         public void UpdateVADDBNew(DataTable dt, string fullTick)
         {
             string spName = "spUpdate_VoterAnalysisData_Ticker_New";
 
             if (fullTick == "fullscreen")
                 spName = "spUpdate_VoterAnalysisData_Fullscreen_New";
+
+            if (fullTick == "manual")
+                spName = "spUpdate_VoterAnalysisManualData_Fullscreen_New";
 
             string cmdStr = $"{spName} ";
 
@@ -2920,7 +3099,7 @@ namespace VoterAnalysisParser
                                 //Specify base command
                                 cmd.CommandText = cmdStr;
 
-                                cmd.Parameters.Add("@tblVADNew", SqlDbType.Structured).Value = dt;
+                                cmd.Parameters.Add("@tblVADManualNew", SqlDbType.Structured).Value = dt;
 
                                 sqlDataAdapter.SelectCommand = cmd;
                                 sqlDataAdapter.SelectCommand.Connection = connection;
@@ -3150,14 +3329,44 @@ namespace VoterAnalysisParser
                 VAPostModel test = new VAPostModel();
 
 
-                if (type % 2 == 0)
-                    test.stack_type = "fullscreen-question";
-                else
-                    test.stack_type = "fullscreen-answer";
+                if (type > 2)
+                    type = 0;
 
-                test.request_type = "stack";
+                switch (type)
+                {
+                    case 0:
+                        test.stack_type = "fullscreen-question";
+                        test.request_type = "stack";
+                        break;
+                    case 1:
+                        test.stack_type = "fullscreen-answer";
+                        test.request_type = "stack";
+                        break;
+                    case 2:
+                        test.stack_type = "";
+                        test.request_type = "manual";
+                        break;
+                    case 3:
+                        test.stack_type = "ticker-question";
+                        test.request_type = "stack";
+                        break;
+                    case 4:
+                        test.stack_type = "ticker-answer";
+                        test.request_type = "stack";
+                        break;
+                    case 5:
+                        test.stack_type = "";
+                        test.request_type = "manual";
+                        break;
+                    case 6:
+                        test.stack_type = "maps";
+                        test.request_type = "stack";
+                        break;
+
+                }
+
+                //test.request_type = "stack";
                 test.method = "updates";
-                //test.election_event = "2018_Midterms";
                 test.election_event = "2020_Primaries";
 
                 string JSONrequest = JsonConvert.SerializeObject(test);
@@ -3191,10 +3400,17 @@ namespace VoterAnalysisParser
                     int pos;
                     string deleteStr;
                     string updateType = "";
+                    
+                    // clear updates lists
                     QuestionDeletes.Clear();
                     AnswerDeletes.Clear();
+                    ManualDeletes.Clear();
+                    MapDeletes.Clear();
+
                     QuestionUpdates.Clear();
                     AnswerUpdates.Clear();
+                    ManualUpdates.Clear();
+                    MapUpdates.Clear();
 
 
                     for (int i = 0; i < Races.Length; i++)
@@ -3206,10 +3422,11 @@ namespace VoterAnalysisParser
                         else
                             listBox1.Items.Add(Races[i]);
 
-
                         pos = Races[i].IndexOf("|");
                         deleteStr = Races[i].Substring(pos + 1);
                         Races[i] = Races[i].Substring(0, pos);
+                        
+                        
                         if (type % 2 == 0)
                         {
                             if (deleteStr == "delete")
@@ -3226,6 +3443,76 @@ namespace VoterAnalysisParser
                                 AnswerUpdates.Add(Races[i]);
                             updateType = "A";
                         }
+
+                        switch (type)
+                        {
+                            case 0:
+                                //fullscreen-question
+                                if (deleteStr == "delete")
+                                    QuestionDeletes.Add(Races[i]);
+                                else if (deleteStr == "create")
+                                    QuestionUpdates.Add(Races[i]);
+                                updateType = "Q";
+                                break;
+
+                            case 1:
+                                //fullscreen-answer
+                                if (deleteStr == "delete")
+                                    AnswerDeletes.Add(Races[i]);
+                                else if (deleteStr == "create")
+                                    AnswerUpdates.Add(Races[i]);
+                                updateType = "A";
+                                break;
+
+                            case 2:
+                                //fullscreen-manual
+                                if (deleteStr == "delete")
+                                    ManualDeletes.Add(Races[i]);
+                                else if (deleteStr == "create")
+                                    ManualUpdates.Add(Races[i]);
+                                updateType = "M";
+                                break;
+                            
+                            case 3:
+                                //ticker-question
+                                if (deleteStr == "delete")
+                                    QuestionDeletes.Add(Races[i]);
+                                else if (deleteStr == "create")
+                                    QuestionUpdates.Add(Races[i]);
+                                updateType = "Q";
+                                break;
+                            
+                            case 4:
+                                //ticker-answer
+                                if (deleteStr == "delete")
+                                    AnswerDeletes.Add(Races[i]);
+                                else if (deleteStr == "create")
+                                    AnswerUpdates.Add(Races[i]);
+                                updateType = "A";
+                                break;
+                            
+                            case 5:
+                                //ticker-manual
+                                if (deleteStr == "delete")
+                                    ManualDeletes.Add(Races[i]);
+                                else if (deleteStr == "create")
+                                    ManualUpdates.Add(Races[i]);
+                                updateType = "M";
+                                break;
+                            
+                            case 6:
+                                //Maps
+                                if (deleteStr == "delete")
+                                    MapDeletes.Add(Races[i]);
+                                else if (deleteStr == "create")
+                                    MapUpdates.Add(Races[i]);
+                                updateType = "X";
+                                break;
+
+                        }
+
+
+
                     }
 
                     if (Races.Length > 0)
@@ -3262,7 +3549,7 @@ namespace VoterAnalysisParser
                 for (int i = 0; i < n; i++)
                     DeleteDataNew(QuestionDeletes[i]);
             }
-            else
+            else if (updateType == "A")
             {
                 // process all answers
                 n = AnswerUpdates.Count;
@@ -3274,7 +3561,19 @@ namespace VoterAnalysisParser
                 for (int i = 0; i < n; i++)
                     DeleteDataNew(AnswerDeletes[i]);
             }
-            
+            else if (updateType == "M")
+            {
+                // process all answers
+                n = ManualUpdates.Count;
+                for (int i = 0; i < n; i++)
+                    ProcessUpdate(ManualUpdates[i]);
+
+                // process all answer deletes
+                n = ManualDeletes.Count;
+                for (int i = 0; i < n; i++)
+                    DeleteDataNew(ManualDeletes[i]);
+            }
+
 
         }
 
@@ -3334,7 +3633,10 @@ namespace VoterAnalysisParser
 
         }
 
+        private void rbQ_CheckedChanged(object sender, EventArgs e)
+        {
 
+        }
     }
 
 }
