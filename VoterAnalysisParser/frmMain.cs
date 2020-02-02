@@ -862,6 +862,17 @@ namespace VoterAnalysisParser
             return "";
         }
 
+        public string GetStateName(string st)
+        {
+            for (int i = 0; i < stateData.Count; i++)
+            {
+                if (stateData[i].stateAbbv == st)
+                    return stateData[i].stateName;
+            }
+            return "";
+        }
+
+
         private void button1_Click(object sender, EventArgs e)
         {
             GetRaces();
@@ -2655,6 +2666,16 @@ namespace VoterAnalysisParser
                 test.request_type = "manual";
             }
 
+            // clear updates lists
+            QuestionDeletes.Clear();
+            AnswerDeletes.Clear();
+            ManualDeletes.Clear();
+            MapDeletes.Clear();
+
+            QuestionUpdates.Clear();
+            AnswerUpdates.Clear();
+            ManualUpdates.Clear();
+            MapUpdates.Clear();
 
             test.method = "updates";
             //test.election_event = "2018_Midterms";
@@ -2676,7 +2697,7 @@ namespace VoterAnalysisParser
                 jsonData = racesWithData;
                 racesWithData = jsonData.Replace("]", "");
                 jsonData = racesWithData;
-                racesWithData = jsonData.Replace(" ", "");
+                //racesWithData = jsonData.Replace(" ", "");
 
 
                 // parse the header info
@@ -2917,7 +2938,7 @@ namespace VoterAnalysisParser
                         sq.q_order = questions.question_order;
                         sq.questionId = questions.questionId;
                         sq.st = questions.State;
-                        sq.State = questions.preface;
+                        sq.State = GetStateName(sq.st);
                         sq.race_id = questions.race_id;
                         sq.question = questions.question;
                         sq.race_type = questions.race_type;
@@ -3064,13 +3085,18 @@ namespace VoterAnalysisParser
 
         public void UpdateVADDBNew(DataTable dt, string fullTick)
         {
+
+            string paramName = "@tblVADNew";
             string spName = "spUpdate_VoterAnalysisData_Ticker_New";
 
             if (fullTick == "fullscreen")
                 spName = "spUpdate_VoterAnalysisData_Fullscreen_New";
 
             if (fullTick == "manual")
+            {
                 spName = "spUpdate_VoterAnalysisManualData_Fullscreen_New";
+                paramName = "@tblVADManualNew";
+            }
 
             string cmdStr = $"{spName} ";
 
@@ -3099,7 +3125,7 @@ namespace VoterAnalysisParser
                                 //Specify base command
                                 cmd.CommandText = cmdStr;
 
-                                cmd.Parameters.Add("@tblVADManualNew", SqlDbType.Structured).Value = dt;
+                                cmd.Parameters.Add(paramName, SqlDbType.Structured).Value = dt;
 
                                 sqlDataAdapter.SelectCommand = cmd;
                                 sqlDataAdapter.SelectCommand.Connection = connection;
@@ -3114,7 +3140,12 @@ namespace VoterAnalysisParser
                             catch (Exception ex)
                             {
                                 transaction.Rollback();
-                                textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
+                                string msg = "UpdateData - SQL Command Exception occurred: " + ex.Message;
+                                if (this.InvokeRequired)
+                                    this.Invoke(new TextWrite(writeTextbox), msg);
+                                else
+                                    textBox1.Text = msg;
+                                //textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
                                 //log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
                                 //log.Debug("UpdateData- SQL Command Exception occurred", ex);
                             }
@@ -3126,7 +3157,13 @@ namespace VoterAnalysisParser
             catch (Exception ex)
             {
                 //log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
-                textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
+                //textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
+                string msg = "UpdateData - SQL Command Exception occurred: " + ex.Message;
+                if (this.InvokeRequired)
+                    this.Invoke(new TextWrite(writeTextbox), msg);
+                else
+                    textBox1.Text = msg;
+
             }
 
         }
@@ -3170,7 +3207,7 @@ namespace VoterAnalysisParser
                             sq.q_order = Convert.ToInt32(answers.question_order);
                             sq.question = answers.question;
                             sq.st = answers.state;
-                            sq.State = answers.preface;
+                            sq.State = GetStateName(sq.st);
                             sq.race_type = answers.race_type;
                             sq.race_id = answers.race_id;
                             if (answers.race_type == "all")
@@ -3388,7 +3425,7 @@ namespace VoterAnalysisParser
                     jsonData = racesWithData;
                     racesWithData = jsonData.Replace("]", "");
                     jsonData = racesWithData;
-                    racesWithData = jsonData.Replace(" ", "");
+                    //racesWithData = jsonData.Replace(" ", "");
 
 
                     // parse the header info
@@ -3417,6 +3454,7 @@ namespace VoterAnalysisParser
                     {
 
 
+                        Races[i] = Races[i].Trim();
                         if (this.InvokeRequired)
                             this.Invoke(new ListErr(writeListbox), Races[i]);
                         else
@@ -3427,22 +3465,22 @@ namespace VoterAnalysisParser
                         Races[i] = Races[i].Substring(0, pos);
                         
                         
-                        if (type % 2 == 0)
-                        {
-                            if (deleteStr == "delete")
-                                QuestionDeletes.Add(Races[i]);
-                            else if (deleteStr == "create")
-                                QuestionUpdates.Add(Races[i]);
-                            updateType = "Q";
-                        }
-                        else
-                        {
-                            if (deleteStr == "delete")
-                                AnswerDeletes.Add(Races[i]);
-                            else if (deleteStr == "create")
-                                AnswerUpdates.Add(Races[i]);
-                            updateType = "A";
-                        }
+                        //if (type % 2 == 0)
+                        //{
+                        //    if (deleteStr == "delete")
+                        //        QuestionDeletes.Add(Races[i]);
+                        //    else if (deleteStr == "create")
+                        //        QuestionUpdates.Add(Races[i]);
+                        //    updateType = "Q";
+                        //}
+                        //else
+                        //{
+                        //    if (deleteStr == "delete")
+                        //        AnswerDeletes.Add(Races[i]);
+                        //    else if (deleteStr == "create")
+                        //        AnswerUpdates.Add(Races[i]);
+                        //    updateType = "A";
+                        //}
 
                         switch (type)
                         {
@@ -3522,13 +3560,17 @@ namespace VoterAnalysisParser
                 }
                 else
                 {
+                    string stacktype = test.stack_type;
+                    if (stacktype == "")
+                        stacktype = "manual";
                     if (this.InvokeRequired)
-                        this.Invoke(new TextWrite(writeTextbox), $"No new {test.stack_type}s.");
+                        this.Invoke(new TextWrite(writeTextbox), $"No new {stacktype}s.");
                     else
                         textBox1.Text = $"No new {test.stack_type}s.";
 
                 }
-                Thread.Sleep(2000);
+                //Thread.Sleep(2000);
+                Thread.Sleep(100);
                 type++;
 
             }

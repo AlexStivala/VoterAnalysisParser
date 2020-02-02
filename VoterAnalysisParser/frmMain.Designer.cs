@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.btnGetData = new System.Windows.Forms.Button();
             this.btnParse = new System.Windows.Forms.Button();
@@ -70,10 +70,10 @@
             this.button15 = new System.Windows.Forms.Button();
             this.button16 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.rbMan = new System.Windows.Forms.RadioButton();
             this.rbA = new System.Windows.Forms.RadioButton();
             this.rbQ = new System.Windows.Forms.RadioButton();
             this.btnRunStop = new System.Windows.Forms.Button();
-            this.rbMan = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -101,6 +101,7 @@
             this.btnGetData.TabIndex = 1;
             this.btnGetData.Text = "Get Data";
             this.btnGetData.UseVisualStyleBackColor = true;
+            this.btnGetData.Visible = false;
             this.btnGetData.Click += new System.EventHandler(this.btnGetData_Click);
             // 
             // btnParse
@@ -113,6 +114,7 @@
             this.btnParse.TabIndex = 2;
             this.btnParse.Text = "Parse";
             this.btnParse.UseVisualStyleBackColor = true;
+            this.btnParse.Visible = false;
             this.btnParse.Click += new System.EventHandler(this.btnParse_Click);
             // 
             // label1
@@ -125,6 +127,7 @@
             this.label1.Size = new System.Drawing.Size(64, 25);
             this.label1.TabIndex = 3;
             this.label1.Text = "label1";
+            this.label1.Visible = false;
             // 
             // label2
             // 
@@ -135,26 +138,27 @@
             this.label2.Size = new System.Drawing.Size(64, 25);
             this.label2.TabIndex = 4;
             this.label2.Text = "label2";
+            this.label2.Visible = false;
             // 
             // dataGridView1
             // 
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridView1.Location = new System.Drawing.Point(40, 573);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 62;
@@ -190,6 +194,7 @@
             this.button1.TabIndex = 8;
             this.button1.Text = "Get Race List";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // listBox1
@@ -214,6 +219,7 @@
             this.button2.TabIndex = 10;
             this.button2.Text = "Get All Races";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button3
@@ -226,6 +232,7 @@
             this.button3.TabIndex = 11;
             this.button3.Text = "Get Question Updates";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Visible = false;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
@@ -238,6 +245,7 @@
             this.button4.TabIndex = 12;
             this.button4.Text = "Parse Questions";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Visible = false;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // button5
@@ -250,6 +258,7 @@
             this.button5.TabIndex = 13;
             this.button5.Text = "Get Question Data";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Visible = false;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button6
@@ -262,6 +271,7 @@
             this.button6.TabIndex = 16;
             this.button6.Text = "Get Answer Data";
             this.button6.UseVisualStyleBackColor = true;
+            this.button6.Visible = false;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // button7
@@ -274,6 +284,7 @@
             this.button7.TabIndex = 15;
             this.button7.Text = "Parse Answers";
             this.button7.UseVisualStyleBackColor = true;
+            this.button7.Visible = false;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
             // button8
@@ -286,6 +297,7 @@
             this.button8.TabIndex = 14;
             this.button8.Text = "Get Answer Updates";
             this.button8.UseVisualStyleBackColor = true;
+            this.button8.Visible = false;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
             // groupBox1
@@ -299,6 +311,7 @@
             this.groupBox1.TabIndex = 17;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Data Type";
+            this.groupBox1.Visible = false;
             // 
             // rbFS
             // 
@@ -334,6 +347,7 @@
             this.btnGettAllUpdates.TabIndex = 18;
             this.btnGettAllUpdates.Text = "Get All Updates";
             this.btnGettAllUpdates.UseVisualStyleBackColor = true;
+            this.btnGettAllUpdates.Visible = false;
             this.btnGettAllUpdates.Click += new System.EventHandler(this.btnGetAllUpdates_Click);
             // 
             // button10
@@ -346,6 +360,7 @@
             this.button10.TabIndex = 21;
             this.button10.Text = "Get Map Data";
             this.button10.UseVisualStyleBackColor = true;
+            this.button10.Visible = false;
             this.button10.Click += new System.EventHandler(this.button10_Click);
             // 
             // button11
@@ -358,6 +373,7 @@
             this.button11.TabIndex = 20;
             this.button11.Text = "Parse Map Data";
             this.button11.UseVisualStyleBackColor = true;
+            this.button11.Visible = false;
             this.button11.Click += new System.EventHandler(this.button11_Click);
             // 
             // button12
@@ -370,6 +386,7 @@
             this.button12.TabIndex = 19;
             this.button12.Text = "Get Map Updates";
             this.button12.UseVisualStyleBackColor = true;
+            this.button12.Visible = false;
             this.button12.Click += new System.EventHandler(this.button12_Click);
             // 
             // lblDataMode
@@ -391,6 +408,7 @@
             this.btnRefresh.TabIndex = 23;
             this.btnRefresh.Text = "Refresh";
             this.btnRefresh.UseVisualStyleBackColor = true;
+            this.btnRefresh.Visible = false;
             this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
             // 
             // timer1
@@ -425,6 +443,7 @@
             this.button9.TabIndex = 25;
             this.button9.Text = "Stop";
             this.button9.UseVisualStyleBackColor = true;
+            this.button9.Visible = false;
             this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // button13
@@ -437,6 +456,7 @@
             this.button13.TabIndex = 26;
             this.button13.Text = "Start";
             this.button13.UseVisualStyleBackColor = true;
+            this.button13.Visible = false;
             this.button13.Click += new System.EventHandler(this.button13_Click);
             // 
             // label4
@@ -487,7 +507,7 @@
             // button14
             // 
             this.button14.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button14.Location = new System.Drawing.Point(792, 1141);
+            this.button14.Location = new System.Drawing.Point(1288, 1158);
             this.button14.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button14.Name = "button14";
             this.button14.Size = new System.Drawing.Size(238, 83);
@@ -499,7 +519,7 @@
             // button15
             // 
             this.button15.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button15.Location = new System.Drawing.Point(1081, 1141);
+            this.button15.Location = new System.Drawing.Point(1577, 1158);
             this.button15.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button15.Name = "button15";
             this.button15.Size = new System.Drawing.Size(238, 83);
@@ -511,11 +531,11 @@
             // button16
             // 
             this.button16.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button16.Location = new System.Drawing.Point(1372, 1141);
+            this.button16.Location = new System.Drawing.Point(588, 1147);
             this.button16.Name = "button16";
             this.button16.Size = new System.Drawing.Size(238, 83);
             this.button16.TabIndex = 144;
-            this.button16.Text = "Refresh";
+            this.button16.Text = "Refresh All";
             this.button16.UseVisualStyleBackColor = true;
             this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
@@ -525,12 +545,23 @@
             this.groupBox2.Controls.Add(this.rbA);
             this.groupBox2.Controls.Add(this.rbQ);
             this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(552, 1089);
+            this.groupBox2.Location = new System.Drawing.Point(1048, 1106);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(187, 158);
             this.groupBox2.TabIndex = 145;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Update Type";
+            // 
+            // rbMan
+            // 
+            this.rbMan.AutoSize = true;
+            this.rbMan.Location = new System.Drawing.Point(31, 117);
+            this.rbMan.Name = "rbMan";
+            this.rbMan.Size = new System.Drawing.Size(108, 29);
+            this.rbMan.TabIndex = 2;
+            this.rbMan.TabStop = true;
+            this.rbMan.Text = "Manual";
+            this.rbMan.UseVisualStyleBackColor = true;
             // 
             // rbA
             // 
@@ -559,7 +590,7 @@
             // btnRunStop
             // 
             this.btnRunStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRunStop.Location = new System.Drawing.Point(1670, 1142);
+            this.btnRunStop.Location = new System.Drawing.Point(256, 1147);
             this.btnRunStop.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnRunStop.Name = "btnRunStop";
             this.btnRunStop.Size = new System.Drawing.Size(238, 83);
@@ -567,17 +598,6 @@
             this.btnRunStop.Text = "Start";
             this.btnRunStop.UseVisualStyleBackColor = true;
             this.btnRunStop.Click += new System.EventHandler(this.button17_Click);
-            // 
-            // rbMan
-            // 
-            this.rbMan.AutoSize = true;
-            this.rbMan.Location = new System.Drawing.Point(31, 117);
-            this.rbMan.Name = "rbMan";
-            this.rbMan.Size = new System.Drawing.Size(108, 29);
-            this.rbMan.TabIndex = 2;
-            this.rbMan.TabStop = true;
-            this.rbMan.Text = "Manual";
-            this.rbMan.UseVisualStyleBackColor = true;
             // 
             // frmMain
             // 
