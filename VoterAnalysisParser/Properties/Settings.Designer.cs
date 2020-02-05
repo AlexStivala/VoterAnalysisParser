@@ -25,17 +25,6 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd_Embargo;Persist Security Info=Tr" +
-            "ue;User ID=gfxuser;Password=elect2018")]
-        public string dbConn_Prod {
-            get {
-                return ((string)(this["dbConn_Prod"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("https://rghm0pgome.execute-api.us-east-1.amazonaws.com/prod?page_type=stack")]
         public string URL_Prod {
             get {
@@ -82,7 +71,18 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User " +
+            "ID=gfxuser;Password=elect2018")]
+        public string dbConn_Prod {
+            get {
+                return ((string)(this["dbConn_Prod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool ProdMode {
             get {
                 return ((bool)(this["ProdMode"]));

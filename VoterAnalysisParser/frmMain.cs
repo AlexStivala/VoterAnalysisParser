@@ -2819,6 +2819,12 @@ namespace VoterAnalysisParser
                 test.election_event = "2020_Primaries";
             }
 
+
+            DeleteDataNew(update);
+
+
+
+
             string JSONrequest = JsonConvert.SerializeObject(test);
 
             string result = SendAPIPostRequest(JSONrequest);
@@ -2848,23 +2854,32 @@ namespace VoterAnalysisParser
 
         public void SendReceipt(string update)
         {
+            VAPostModel test = new VAPostModel();
             // parse the header info
             string[] strSeparator = new string[] { ":" };
             string[] Races;
 
             // this takes the header and splits it into key-value pairs
             Races = update.Split(strSeparator, StringSplitOptions.None);
-            string method = Races[3];
+            if (Races.Length > 1)
+            {
+                string method = Races[3];
 
-            VAPostModel test = new VAPostModel();
+                test.request_type = "stack";
+                test.stack_type = method;
+                test.method = "receipt";
+                test.id = update;
+                test.election_event = "2020_Primaries";
+            }
+            else
+            {
+                test.request_type = "manual";
+                test.stack_type = "";
+                test.method = "receipt";
+                test.id = update;
+                test.election_event = "2020_Primaries";
 
-            test.request_type = "stack";
-            test.stack_type = method;
-            test.method = "receipt";
-            test.id = update;
-            //test.election_event = "2018_Midterms";
-            test.election_event = "2020_Primaries";
-
+            }
 
             string JSONrequest = JsonConvert.SerializeObject(test);
 
@@ -2940,7 +2955,12 @@ namespace VoterAnalysisParser
                         sq.st = questions.State;
                         sq.State = GetStateName(sq.st);
                         sq.race_id = questions.race_id;
-                        sq.question = questions.question;
+                        
+                        if (questions.question.Length > 120)
+                            sq.question = questions.question.Substring(0,120);
+                        else
+                            sq.question = questions.question;
+                        
                         sq.race_type = questions.race_type;
                         sq.qcode = questions.qcode;
                         sq.filter = questions.filter;
@@ -2962,7 +2982,12 @@ namespace VoterAnalysisParser
                         sq.variable_count = Convert.ToInt32(questions.h_answers[j].variable_count);
                         sq.variable_percent = Convert.ToInt32(questions.h_answers[j].variable_percent);
                         sq.original_order = Convert.ToInt32(questions.h_answers[j].original_order);
+                        
                         sq.name = questions.h_answers[j].original_name;
+                        if (sq.name.Length > 50)
+                            sq.name = sq.name.Substring(0, 50);
+                        
+                        
                         sq.alias = questions.h_answers[j].alias_name;
                         sq.new_order = Convert.ToInt32(questions.h_answers[j].new_order);
 
@@ -3205,7 +3230,12 @@ namespace VoterAnalysisParser
                             sq.filter = answers.filter;
                             sq.questionId = answers.questionId;
                             sq.q_order = Convert.ToInt32(answers.question_order);
-                            sq.question = answers.question;
+
+                            if (answers.question.Length > 120)
+                                sq.question = answers.question.Substring(0, 120);
+                            else
+                                sq.question = answers.question;
+
                             sq.st = answers.state;
                             sq.State = GetStateName(sq.st);
                             sq.race_type = answers.race_type;
@@ -3227,6 +3257,9 @@ namespace VoterAnalysisParser
                             sq.variable_percent = Convert.ToInt32(answers.h_answers[j].variable_percent);
                             sq.original_order = Convert.ToInt32(answers.h_answers[j].original_order);
                             sq.original_name = answers.h_answers[j].original_name;
+                            if (sq.original_name.Length > 50)
+                                sq.original_name = sq.original_name.Substring(0, 50);
+
 
                             cnt++;
                             //label2.Text = cnt.ToString();
@@ -3244,6 +3277,9 @@ namespace VoterAnalysisParser
                             else
                             {
                                 sq.name = answers.h_answers[j].results[ri - 1].original_name;
+                                if (sq.name.Length > 50)
+                                    sq.name = sq.name.Substring(0, 50);
+
                                 string temp = sq.name;
                                 int p1 = sq.name.IndexOf(")");
 
@@ -3637,26 +3673,35 @@ namespace VoterAnalysisParser
 
             try
             {
+                string tblName = "FE_VoterAnalysisData_FS_New";
                 string[] strSeparator = new string[] { ":" };
                 string[] Races;
 
                 // this takes the header and splits it into key-value pairs
                 Races = update.Split(strSeparator, StringSplitOptions.None);
-                string method = Races[3];
+                if (Races.Length > 1)
+                {
+                    string method = Races[3];
 
-                strSeparator = new string[] { "-" };
-                string[] qa;
-                qa = method.Split(strSeparator, StringSplitOptions.None);
-                string fullTick = qa[0];
-                string faq = qa[1];
+                    strSeparator = new string[] { "-" };
+                    string[] qa;
+                    qa = method.Split(strSeparator, StringSplitOptions.None);
+                    string fullTick = qa[0];
+                    string faq = qa[1];
+                    
+                    
+                    if (fullTick == "ticker")
+                        tblName = "FE_VoterAnalysisData_TKR_New";
+                    else
+                        tblName = "FE_VoterAnalysisData_FS_New";
 
-                string tblName = "FE_VoterAnalysisData_TKR_New";
 
-                if (dataType == 1)
-                    tblName = "FE_VoterAnalysisData_FS_New";
 
-                //if (QnA == "M")
+                    //if (QnA == "M")
                     //tblName = "FE_VoterAnalysisData_Map";
+                }
+                else
+                    tblName = "FE_VoterAnalysisData_MAN_New";
 
 
                 string delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
