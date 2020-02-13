@@ -116,7 +116,7 @@ namespace VoterAnalysisParser
             var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             this.Text = String.Format("Voter Analysis Parser  Version {0}", version);
 
-            log.Info($" ********** VoterAnalysisParser Started **********");
+            log.Info($" ********** VoterAnalysisParser Started {version} **********");
 
             bool prodMode = Properties.Settings.Default.ProdMode;
             if (prodMode)
@@ -667,7 +667,7 @@ namespace VoterAnalysisParser
                             {
                                 transaction.Rollback();
                                 textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
-                                //log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
+                                log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
                                 //log.Debug("UpdateData- SQL Command Exception occurred", ex);
                             }
                         }
@@ -677,7 +677,7 @@ namespace VoterAnalysisParser
             }
             catch (Exception ex)
             {
-                //log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
+                log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
                 textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
 
             }
@@ -811,7 +811,7 @@ namespace VoterAnalysisParser
             catch (Exception ex)
             {
                 // Log error
-                //log.Error("GetDBData Exception occurred: " + ex.Message);
+                log.Error("GetDBData Exception occurred: " + ex.Message);
                 //log.Debug("GetDBData Exception occurred", ex);
             }
 
@@ -1516,7 +1516,7 @@ namespace VoterAnalysisParser
             }
             catch (Exception ex)
             {
-                //log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
+                log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
                 textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
 
             }
@@ -1572,7 +1572,7 @@ namespace VoterAnalysisParser
                             {
                                 transaction.Rollback();
                                 textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
-                                //log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
+                                log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
                                 //log.Debug("UpdateData- SQL Command Exception occurred", ex);
                             }
                         }
@@ -1582,7 +1582,7 @@ namespace VoterAnalysisParser
             }
             catch (Exception ex)
             {
-                //log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
+                log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
                 textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
 
             }
@@ -2819,8 +2819,9 @@ namespace VoterAnalysisParser
                 test.election_event = "2020_Primaries";
             }
 
-
-            DeleteDataNew(update);
+            log.Info($"");
+            log.Info($"  Processing:    {update}");
+            //DeleteDataNew(update, false);
 
 
 
@@ -2833,7 +2834,8 @@ namespace VoterAnalysisParser
                 this.Invoke(new TextWrite(writeTextbox), result);
             else
                 textBox1.Text = result;
-            
+
+            log.Info($" Data received:  {result}");
             string err = "stackTrace";
             int pos = jsonData.IndexOf(err);
             if (pos >= 0)
@@ -2850,6 +2852,7 @@ namespace VoterAnalysisParser
                 else if (faq == "manual")
                     ProcessManualDataNew(jsonData, update, fullTick);
             }
+            
         }
 
         public void SendReceipt(string update)
@@ -2884,6 +2887,10 @@ namespace VoterAnalysisParser
             string JSONrequest = JsonConvert.SerializeObject(test);
 
             string result = SendAPIPostRequest(JSONrequest);
+
+            log.Info($"SendReceipt: {result}");
+            log.Info($"");
+
             string jsonData = result;
             if (this.InvokeRequired)
                 this.Invoke(new TextWrite(writeTextbox), result);
@@ -2914,6 +2921,9 @@ namespace VoterAnalysisParser
             string JSONrequest = JsonConvert.SerializeObject(test);
 
             string result = SendAPIPostRequest(JSONrequest);
+            log.Info($"SendReceipt: {result}");
+            log.Info($"");
+
             string jsonData = result;
             if (this.InvokeRequired)
                 this.Invoke(new TextWrite(writeTextbox), result);
@@ -3002,23 +3012,29 @@ namespace VoterAnalysisParser
                     }
 
                     //dataGridView1.DataSource = sqm;
+                    
+                    DeleteDataNew(update, false);
+
                     DataTable dt = new DataTable();
                     dt = ListToDataTable(sqm);
                     UpdateVADDBNew(dt, fullTick);
 
+                    SendReceipt(update);
+
                 }
                 else
                 {
-                    listBox2.Items.Add($"Data error for Q: {update}");
+                    //listBox2.Items.Add($"Data error for Q: {update}");
                     log.Error($"Data error for Q: {update}");
+                    
                 }
 
-                SendReceipt(update);
-                
-                
+
+
             }
             catch (Exception ex)
             {
+                log.Info($"");
                 log.Error($"Error processing Question Data: {update}  {ex}");
             }
         }
@@ -3085,9 +3101,15 @@ namespace VoterAnalysisParser
 
                     }
 
+                    DeleteDataNew(update, false);
+
+
                     DataTable dt = new DataTable();
                     dt = ListToDataTable(sqm);
                     UpdateVADDBNew(dt, fullTick);
+
+                    SendManualReceipt(update);
+
 
                 }
                 else
@@ -3096,12 +3118,12 @@ namespace VoterAnalysisParser
                     log.Error($"Data error for MAN: {update}");
                 }
 
-                SendManualReceipt(update);
 
 
             }
             catch (Exception ex)
             {
+                log.Info($"");
                 log.Error($"Error processing Question Data: {update}  {ex}");
             }
         }
@@ -3171,7 +3193,7 @@ namespace VoterAnalysisParser
                                 else
                                     textBox1.Text = msg;
                                 //textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
-                                //log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
+                                log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
                                 //log.Debug("UpdateData- SQL Command Exception occurred", ex);
                             }
                         }
@@ -3181,7 +3203,7 @@ namespace VoterAnalysisParser
             }
             catch (Exception ex)
             {
-                //log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
+                log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
                 //textBox1.Text = "UpdateData - SQL Command Exception occurred: " + ex.Message;
                 string msg = "UpdateData - SQL Command Exception occurred: " + ex.Message;
                 if (this.InvokeRequired)
@@ -3309,18 +3331,21 @@ namespace VoterAnalysisParser
                     }
 
                     //dataGridView1.DataSource = sqm;
+                    DeleteDataNew(update, false);
+
                     DataTable dt = new DataTable();
                     dt = ListToDataTable(sqm);
                     UpdateVADDBNew(dt, fullTick);
+
+                    SendReceipt(update);
                 }
                 else
                 {
                     //listBox2.Items.Add($"Data error for A: {update}");
                     log.Error($"Data error for A: {update}");
-
                 }
 
-                SendReceipt(update); 
+                
 
             }
             catch (Exception ex)
@@ -3384,6 +3409,7 @@ namespace VoterAnalysisParser
         public void GetAllNew()
         {
             int type = 0;
+            string typeStr = "";
 
             while (runStop == "Stop")
             {
@@ -3402,7 +3428,7 @@ namespace VoterAnalysisParser
                 VAPostModel test = new VAPostModel();
 
 
-                if (type > 2)
+                if (type > 4)
                     type = 0;
 
                 switch (type)
@@ -3410,14 +3436,17 @@ namespace VoterAnalysisParser
                     case 0:
                         test.stack_type = "fullscreen-question";
                         test.request_type = "stack";
+                        typeStr = "fullscreen-question";
                         break;
                     case 1:
                         test.stack_type = "fullscreen-answer";
                         test.request_type = "stack";
+                        typeStr = "fullscreen-answer";
                         break;
                     case 2:
                         test.stack_type = "";
                         test.request_type = "manual";
+                        typeStr = "manual";
                         break;
                     case 3:
                         test.stack_type = "ticker-question";
@@ -3428,10 +3457,6 @@ namespace VoterAnalysisParser
                         test.request_type = "stack";
                         break;
                     case 5:
-                        test.stack_type = "";
-                        test.request_type = "manual";
-                        break;
-                    case 6:
                         test.stack_type = "maps";
                         test.request_type = "stack";
                         break;
@@ -3496,7 +3521,8 @@ namespace VoterAnalysisParser
                         else
                             listBox1.Items.Add(Races[i]);
 
-                        pos = Races[i].IndexOf("|");
+                        //pos = Races[i].IndexOf("|");
+                        pos = Races[i].LastIndexOf("|");
                         deleteStr = Races[i].Substring(pos + 1);
                         Races[i] = Races[i].Substring(0, pos);
                         
@@ -3590,8 +3616,11 @@ namespace VoterAnalysisParser
                     }
 
                     if (Races.Length > 0)
+                    {
+                        log.Info($"");
+                        log.Info($" {type} {typeStr}: {Races.Length}");
                         ProcessUpdatesNew(updateType);
-
+                    }
                     
                 }
                 else
@@ -3615,6 +3644,7 @@ namespace VoterAnalysisParser
         public void ProcessUpdatesNew(string updateType)
         {
             int n = 0;
+            log.Info($"{updateType}");
             if (updateType == "Q")
             {
                 // process all questions
@@ -3625,7 +3655,7 @@ namespace VoterAnalysisParser
                 // process all question deletes
                 n = QuestionDeletes.Count;
                 for (int i = 0; i < n; i++)
-                    DeleteDataNew(QuestionDeletes[i]);
+                    DeleteDataNew(QuestionDeletes[i], true);
             }
             else if (updateType == "A")
             {
@@ -3637,7 +3667,7 @@ namespace VoterAnalysisParser
                 // process all answer deletes
                 n = AnswerDeletes.Count;
                 for (int i = 0; i < n; i++)
-                    DeleteDataNew(AnswerDeletes[i]);
+                    DeleteDataNew(AnswerDeletes[i], true);
             }
             else if (updateType == "M")
             {
@@ -3649,7 +3679,7 @@ namespace VoterAnalysisParser
                 // process all answer deletes
                 n = ManualDeletes.Count;
                 for (int i = 0; i < n; i++)
-                    DeleteDataNew(ManualDeletes[i]);
+                    DeleteDataNew(ManualDeletes[i], true);
             }
 
 
@@ -3668,7 +3698,7 @@ namespace VoterAnalysisParser
             textBox1.Text = s;
         }
 
-        public void DeleteDataNew(string update)
+        public void DeleteDataNew(string update, bool sendReceipt)
         {
 
             try
@@ -3707,8 +3737,11 @@ namespace VoterAnalysisParser
                 string delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
                 IssueSQLCmd(delCmd);
 
-                SendReceipt(update);
-
+                if (sendReceipt)
+                {
+                    SendReceipt(update); 
+                    log.Info($"  SendReceipt:    {update}");
+                }
 
 
             }
