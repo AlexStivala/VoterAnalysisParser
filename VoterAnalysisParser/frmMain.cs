@@ -25,6 +25,7 @@ namespace VoterAnalysisParser
 {
     public delegate void ListErr(string s);
     public delegate void TextWrite(string s);
+    public delegate void TextWrite2(string s);
 
     public partial class frmMain : Form , IAppender
     {
@@ -46,7 +47,12 @@ namespace VoterAnalysisParser
 
         public string newapiKey = "u5HPTwm77q2VxbXRUS6KG3UiKlR0FJEd48CTCoJk";
         public string newbaseUrl = "https://y384o59d2e.execute-api.us-west-2.amazonaws.com/prod";
-                                    
+
+        public string testapiKey = "HVE4MZQcwV1EBUPL587re6ezLkFlmydW5kEVrAtU";
+        public string testbaseUrl = "https://khy8ymj127.execute-api.us-east-1.amazonaws.com/test";
+
+        bool prodMode = Properties.Settings.Default.ProdMode;
+
 
         public class StateInfo
         {
@@ -117,19 +123,22 @@ namespace VoterAnalysisParser
             this.Text = String.Format("Voter Analysis Parser  Version {0}", version);
 
             log.Info($" ********** VoterAnalysisParser Started {version} **********");
-
-            bool prodMode = Properties.Settings.Default.ProdMode;
+            
             if (prodMode)
             {
                 baseUrl = Properties.Settings.Default.URL_Prod;
                 apiKey = Properties.Settings.Default.api_key_Prod;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
+                btnAPI.Text = "Switch to Test API";
+                lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
             }
             else
             {
                 baseUrl = Properties.Settings.Default.URL_QA;
                 apiKey = Properties.Settings.Default.api_key_QA;
                 dbConn = Properties.Settings.Default.dbConn_QA;
+                btnAPI.Text = "Switch to Prod API";
+                lblBaseUrl.Text = $"Using Test API: {baseUrl}";
             }
 
 
@@ -140,7 +149,7 @@ namespace VoterAnalysisParser
             var pw = builder.Password;
 
             //lblBaseUrl.Text = baseUrl;
-            lblBaseUrl.Text = newbaseUrl;
+            //lblBaseUrl.Text = newbaseUrl;
             lblDB.Text = $"{dataSource}  {initCat}";
 
             //client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
@@ -1047,7 +1056,8 @@ namespace VoterAnalysisParser
         private string SendAPIPostRequest(string requestJson)
         {
             var jsonResponse = "";
-            string url = newbaseUrl;
+            //string url = newbaseUrl;
+            string url = baseUrl;
 
             try
             {
@@ -1055,10 +1065,12 @@ namespace VoterAnalysisParser
                 
                 var content = new StringContent(requestJson.ToString(), Encoding.UTF8, "application/json");
 
-                requestMessage.Headers.Add("x-api-key", newapiKey);
+                //requestMessage.Headers.Add("x-api-key", newapiKey);
+                requestMessage.Headers.Add("x-api-key", apiKey);
                 requestMessage.Content = new StringContent(requestJson.ToString(), Encoding.UTF8, "application/json");
                 
-                client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
+                //client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
+                client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
 
                 //HttpResponseMessage result = client.PostAsync(url, requestMessage.Content).Result;
@@ -2823,9 +2835,6 @@ namespace VoterAnalysisParser
             log.Info($"  Processing:    {update}");
             //DeleteDataNew(update, false);
 
-
-
-
             string JSONrequest = JsonConvert.SerializeObject(test);
 
             string result = SendAPIPostRequest(JSONrequest);
@@ -2841,7 +2850,14 @@ namespace VoterAnalysisParser
             if (pos >= 0)
             {
                 // Error - send receipt
-                SendReceipt(update); 
+                SendReceipt(update);
+
+                string s = $"Data Error for: {update}";
+                if (this.InvokeRequired)
+                    this.Invoke(new ListErr(writeListbox2), s);
+                else
+                    listBox2.Items.Add(s);
+
             }
             else
             {
@@ -3021,16 +3037,25 @@ namespace VoterAnalysisParser
 
                     SendReceipt(update);
 
+                    string s = $"Q: {update}  OK";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
+
                 }
                 else
                 {
                     //listBox2.Items.Add($"Data error for Q: {update}");
                     log.Error($"Data error for Q: {update}");
                     
+                    string s = $"Data error for Q: {update}";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
+
                 }
-
-
-
             }
             catch (Exception ex)
             {
@@ -3110,12 +3135,21 @@ namespace VoterAnalysisParser
 
                     SendManualReceipt(update);
 
-
+                    string s = $"M: {update}  OK";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
                 }
                 else
                 {
                     listBox2.Items.Add($"Data error for MAN: {update}");
                     log.Error($"Data error for MAN: {update}");
+                    string s = $"Data error for MAN: {update}";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
                 }
 
 
@@ -3338,14 +3372,27 @@ namespace VoterAnalysisParser
                     UpdateVADDBNew(dt, fullTick);
 
                     SendReceipt(update);
+
+                    string s = $"A: {update}  OK";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
+
                 }
                 else
                 {
                     //listBox2.Items.Add($"Data error for A: {update}");
                     log.Error($"Data error for A: {update}");
+                    string s = $"Data error for A: {update}";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
+
                 }
 
-                
+
 
             }
             catch (Exception ex)
@@ -3360,24 +3407,37 @@ namespace VoterAnalysisParser
             listBox1.Items.Clear();
             VAPostModel test = new VAPostModel();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 test.request_type = "stack";
                 if (i == 0)
                     test.stack_type = "fullscreen-answer";
                 if (i == 1)
                     test.stack_type = "fullscreen-question";
+                if (i == 2)
+                    test.stack_type = "ticker-answer";
+                if (i == 3)
+                    test.stack_type = "ticker-question";
+
+
+
+
+
                 test.method = "refresh";
                 //test.election_event = "2018_Midterms";
                 test.election_event = "2020_Primaries";
 
 
                 string JSONrequest = JsonConvert.SerializeObject(test);
-
                 string result = SendAPIPostRequest(JSONrequest);
 
-                textBox1.Text = result;
+                string s = $"Refreshed {test.stack_type}";
+                if (this.InvokeRequired)
+                    this.Invoke(new ListErr(writeListbox2), s);
+                else
+                    listBox2.Items.Add(s);
 
+                textBox1.Text = result;
                 string jsonData = result;
             }
         }
@@ -3423,10 +3483,7 @@ namespace VoterAnalysisParser
                 else
                     textBox1.Text = "Checking for data.......";
 
-
-
                 VAPostModel test = new VAPostModel();
-
 
                 if (type > 4)
                     type = 0;
@@ -3521,97 +3578,102 @@ namespace VoterAnalysisParser
                         else
                             listBox1.Items.Add(Races[i]);
 
+                        updateType = "0";
                         //pos = Races[i].IndexOf("|");
                         pos = Races[i].LastIndexOf("|");
-                        deleteStr = Races[i].Substring(pos + 1);
-                        Races[i] = Races[i].Substring(0, pos);
-                        
-                        
-                        //if (type % 2 == 0)
-                        //{
-                        //    if (deleteStr == "delete")
-                        //        QuestionDeletes.Add(Races[i]);
-                        //    else if (deleteStr == "create")
-                        //        QuestionUpdates.Add(Races[i]);
-                        //    updateType = "Q";
-                        //}
-                        //else
-                        //{
-                        //    if (deleteStr == "delete")
-                        //        AnswerDeletes.Add(Races[i]);
-                        //    else if (deleteStr == "create")
-                        //        AnswerUpdates.Add(Races[i]);
-                        //    updateType = "A";
-                        //}
-
-                        switch (type)
+                        if (pos >= 0)
                         {
-                            case 0:
-                                //fullscreen-question
-                                if (deleteStr == "delete")
-                                    QuestionDeletes.Add(Races[i]);
-                                else if (deleteStr == "create")
-                                    QuestionUpdates.Add(Races[i]);
-                                updateType = "Q";
-                                break;
+                            deleteStr = Races[i].Substring(pos + 1);
+                            Races[i] = Races[i].Substring(0, pos);
 
-                            case 1:
-                                //fullscreen-answer
-                                if (deleteStr == "delete")
-                                    AnswerDeletes.Add(Races[i]);
-                                else if (deleteStr == "create")
-                                    AnswerUpdates.Add(Races[i]);
-                                updateType = "A";
-                                break;
 
-                            case 2:
-                                //fullscreen-manual
-                                if (deleteStr == "delete")
-                                    ManualDeletes.Add(Races[i]);
-                                else if (deleteStr == "create")
-                                    ManualUpdates.Add(Races[i]);
-                                updateType = "M";
-                                break;
-                            
-                            case 3:
-                                //ticker-question
-                                if (deleteStr == "delete")
-                                    QuestionDeletes.Add(Races[i]);
-                                else if (deleteStr == "create")
-                                    QuestionUpdates.Add(Races[i]);
-                                updateType = "Q";
-                                break;
-                            
-                            case 4:
-                                //ticker-answer
-                                if (deleteStr == "delete")
-                                    AnswerDeletes.Add(Races[i]);
-                                else if (deleteStr == "create")
-                                    AnswerUpdates.Add(Races[i]);
-                                updateType = "A";
-                                break;
-                            
-                            case 5:
-                                //ticker-manual
-                                if (deleteStr == "delete")
-                                    ManualDeletes.Add(Races[i]);
-                                else if (deleteStr == "create")
-                                    ManualUpdates.Add(Races[i]);
-                                updateType = "M";
-                                break;
-                            
-                            case 6:
-                                //Maps
-                                if (deleteStr == "delete")
-                                    MapDeletes.Add(Races[i]);
-                                else if (deleteStr == "create")
-                                    MapUpdates.Add(Races[i]);
-                                updateType = "X";
-                                break;
+                            //if (type % 2 == 0)
+                            //{
+                            //    if (deleteStr == "delete")
+                            //        QuestionDeletes.Add(Races[i]);
+                            //    else if (deleteStr == "create")
+                            //        QuestionUpdates.Add(Races[i]);
+                            //    updateType = "Q";
+                            //}
+                            //else
+                            //{
+                            //    if (deleteStr == "delete")
+                            //        AnswerDeletes.Add(Races[i]);
+                            //    else if (deleteStr == "create")
+                            //        AnswerUpdates.Add(Races[i]);
+                            //    updateType = "A";
+                            //}
+
+                            switch (type)
+                            {
+                                case 0:
+                                    //fullscreen-question
+                                    if (deleteStr == "delete")
+                                        QuestionDeletes.Add(Races[i]);
+                                    else if (deleteStr == "create")
+                                        QuestionUpdates.Add(Races[i]);
+                                    updateType = "Q";
+                                    break;
+
+                                case 1:
+                                    //fullscreen-answer
+                                    if (deleteStr == "delete")
+                                        AnswerDeletes.Add(Races[i]);
+                                    else if (deleteStr == "create")
+                                        AnswerUpdates.Add(Races[i]);
+                                    updateType = "A";
+                                    break;
+
+                                case 2:
+                                    //fullscreen-manual
+                                    if (deleteStr == "delete")
+                                        ManualDeletes.Add(Races[i]);
+                                    else if (deleteStr == "create")
+                                        ManualUpdates.Add(Races[i]);
+                                    updateType = "M";
+                                    break;
+
+                                case 3:
+                                    //ticker-question
+                                    if (deleteStr == "delete")
+                                        QuestionDeletes.Add(Races[i]);
+                                    else if (deleteStr == "create")
+                                        QuestionUpdates.Add(Races[i]);
+                                    updateType = "Q";
+                                    break;
+
+                                case 4:
+                                    //ticker-answer
+                                    if (deleteStr == "delete")
+                                        AnswerDeletes.Add(Races[i]);
+                                    else if (deleteStr == "create")
+                                        AnswerUpdates.Add(Races[i]);
+                                    updateType = "A";
+                                    break;
+
+                                case 5:
+                                    //ticker-manual
+                                    if (deleteStr == "delete")
+                                        ManualDeletes.Add(Races[i]);
+                                    else if (deleteStr == "create")
+                                        ManualUpdates.Add(Races[i]);
+                                    updateType = "M";
+                                    break;
+
+                                case 6:
+                                    //Maps
+                                    if (deleteStr == "delete")
+                                        MapDeletes.Add(Races[i]);
+                                    else if (deleteStr == "create")
+                                        MapUpdates.Add(Races[i]);
+                                    updateType = "X";
+                                    break;
+
+                            }
 
                         }
-
-
+                        else
+                            Races[i] = "";
 
                     }
 
@@ -3619,7 +3681,8 @@ namespace VoterAnalysisParser
                     {
                         log.Info($"");
                         log.Info($" {type} {typeStr}: {Races.Length}");
-                        ProcessUpdatesNew(updateType);
+                        if (updateType != "0")
+                            ProcessUpdatesNew(updateType);
                     }
                     
                 }
@@ -3698,6 +3761,15 @@ namespace VoterAnalysisParser
             textBox1.Text = s;
         }
 
+        public void writeListbox2(string s)
+        {
+            string tn = DateTime.Now.ToString("hh:mm:ss");
+            if (s == "!#")
+                listBox2.Items.Clear();
+            else
+                listBox2.Items.Add($"{tn}  {s}");
+        }
+
         public void DeleteDataNew(string update, bool sendReceipt)
         {
 
@@ -3741,8 +3813,13 @@ namespace VoterAnalysisParser
                 {
                     SendReceipt(update); 
                     log.Info($"  SendReceipt:    {update}");
-                }
 
+                    string s = $"Deleted: {update}";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
+                }
 
             }
             catch (Exception ex)
@@ -3757,6 +3834,28 @@ namespace VoterAnalysisParser
         {
 
         }
+
+        private void btnAPI_Click(object sender, EventArgs e)
+        {
+            prodMode = !prodMode;
+            if (prodMode)
+            {
+                baseUrl = Properties.Settings.Default.URL_Prod;
+                apiKey = Properties.Settings.Default.api_key_Prod;
+                dbConn = Properties.Settings.Default.dbConn_Prod;
+                btnAPI.Text = "Switch to Test API";
+                lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
+            }
+            else
+            {
+                baseUrl = Properties.Settings.Default.URL_QA;
+                apiKey = Properties.Settings.Default.api_key_QA;
+                dbConn = Properties.Settings.Default.dbConn_QA;
+                btnAPI.Text = "Switch to Prod API";
+                lblBaseUrl.Text = $"Using Test API: {baseUrl}";
+            }
+        }
+
     }
 
 }
