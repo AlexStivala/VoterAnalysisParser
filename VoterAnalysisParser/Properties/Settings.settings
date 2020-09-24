@@ -9,10 +9,10 @@
       <Value Profile="(Default)">u5HPTwm77q2VxbXRUS6KG3UiKlR0FJEd48CTCoJk</Value>
     </Setting>
     <Setting Name="URL_QA" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">https://khy8ymj127.execute-api.us-east-1.amazonaws.com/test</Value>
+      <Value Profile="(Default)">https://c59epy4bbl.execute-api.us-east-1.amazonaws.com/dev/edspost</Value>
     </Setting>
     <Setting Name="api_key_QA" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">HVE4MZQcwV1EBUPL587re6ezLkFlmydW5kEVrAtU</Value>
+      <Value Profile="(Default)">213lxJEq7m1bkcmT2w34x1kj1KCep2j9ES91nrBj</Value>
     </Setting>
     <Setting Name="dbConn_QA" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=gfxuser;Password=elect2018</Value>
@@ -25,7 +25,7 @@
       <Value Profile="(Default)">Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=gfxuser;Password=elect2018</Value>
     </Setting>
     <Setting Name="ProdMode" Type="System.Boolean" Scope="Application">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

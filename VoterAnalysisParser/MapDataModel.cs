@@ -19,10 +19,9 @@ namespace VoterAnalysisParser
         {
             public string state { get; set; }
             public int percent { get; set; }
-            
+
         }
 
-        
-
+ 
     }
 }

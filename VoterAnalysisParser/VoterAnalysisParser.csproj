@@ -61,7 +61,10 @@
   <ItemGroup>
     <Compile Include="API_Params.cs" />
     <Compile Include="MapDataModel.cs" />
+    <Compile Include="MapDataModelNew.cs" />
+    <Compile Include="MapMetaDataModelNew.cs" />
     <Compile Include="MapSQLModel.cs" />
+    <Compile Include="MapSQLModelNew.cs" />
     <Compile Include="VAAnswerModelNew.cs" />
     <Compile Include="VAManualModelNew.cs" />
     <Compile Include="VAPostModel.cs" />

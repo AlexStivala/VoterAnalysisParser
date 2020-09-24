@@ -12,7 +12,7 @@ namespace VoterAnalysisParser.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.4.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.7.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -43,7 +43,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://khy8ymj127.execute-api.us-east-1.amazonaws.com/test")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://c59epy4bbl.execute-api.us-east-1.amazonaws.com/dev/edspost")]
         public string URL_QA {
             get {
                 return ((string)(this["URL_QA"]));
@@ -52,7 +52,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("HVE4MZQcwV1EBUPL587re6ezLkFlmydW5kEVrAtU")]
+        [global::System.Configuration.DefaultSettingValueAttribute("213lxJEq7m1bkcmT2w34x1kj1KCep2j9ES91nrBj")]
         public string api_key_QA {
             get {
                 return ((string)(this["api_key_QA"]));
@@ -82,7 +82,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool ProdMode {
             get {
                 return ((bool)(this["ProdMode"]));

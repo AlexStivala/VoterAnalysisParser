@@ -1583,7 +1583,7 @@ namespace VoterAnalysisParser
                             catch (Exception ex)
                             {
                                 transaction.Rollback();
-                                textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
+                                //textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
                                 log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
                                 //log.Debug("UpdateData- SQL Command Exception occurred", ex);
                             }
@@ -1595,7 +1595,68 @@ namespace VoterAnalysisParser
             catch (Exception ex)
             {
                 log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
-                textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
+                //textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
+
+            }
+
+        }
+        public void UpdateVAMapDataNew(DataTable dt)
+        {
+            string spName = "spUpdate_VoterAnalysisData_Map_New";
+            string cmdStr = $"{spName} ";
+
+            try
+            {
+                // Instantiate the connection
+                using (SqlConnection connection = new SqlConnection(dbConn))
+                {
+                    connection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter())
+                    {
+                        using (SqlCommand cmd = new SqlCommand())
+                        {
+                            SqlTransaction transaction;
+                            // Start a local transaction.
+                            transaction = connection.BeginTransaction("Update Voter Analysis Map Data");
+
+                            // Must assign both transaction object and connection 
+                            // to Command object for a pending local transaction
+                            cmd.Connection = connection;
+                            cmd.Transaction = transaction;
+
+                            try
+                            {
+                                //Specify base command
+                                cmd.CommandText = cmdStr;
+
+                                cmd.Parameters.Add("@tblVAMD", SqlDbType.Structured).Value = dt;
+
+                                sqlDataAdapter.SelectCommand = cmd;
+                                sqlDataAdapter.SelectCommand.Connection = connection;
+                                sqlDataAdapter.SelectCommand.CommandType = CommandType.StoredProcedure;
+
+                                // Execute stored proc 
+                                sqlDataAdapter.SelectCommand.ExecuteNonQuery();
+
+                                //Attempt to commit the transaction
+                                transaction.Commit();
+                            }
+                            catch (Exception ex)
+                            {
+                                transaction.Rollback();
+                                //textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
+                                log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
+                                //log.Debug("UpdateData- SQL Command Exception occurred", ex);
+                            }
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
+                //textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
 
             }
 
@@ -2574,6 +2635,146 @@ namespace VoterAnalysisParser
             }
 
         }
+        public void ProcessMapDataNew(string json, string race)
+        {
+            try
+            {
+                string VA_Data_Id = race;
+                string title = "";
+                
+                MapDataModelNew mdat = new MapDataModelNew();
+
+                string err = "stackTrace";
+                int pos = json.IndexOf(err);
+                if (pos != -1)
+                {
+                    err = "something went wrong";
+                    pos = json.IndexOf(err);
+                }
+
+                if (pos == -1)
+                {
+
+                    mdat = JsonConvert.DeserializeObject<MapDataModelNew>(json);
+
+                    List<MapSQLModelNew> mData = new List<MapSQLModelNew>();
+
+                    int cnt = 0;
+                    int n = mdat.data.Count();
+
+                    for (int j = 0; j < n; j++)
+                    {
+                        MapSQLModelNew mdm = new MapSQLModelNew();
+                        cnt++;
+                        //label2.Text = cnt.ToString();
+                        mdm.VA_Data_Id = VA_Data_Id;
+                        mdm.r_type = "M";
+                        mdm.answer = mdat.data[j].answer;
+                        mdm.qcode = mdat.data[j].qcode;
+                        mdm.response_sum = Convert.ToInt32(mdat.data[j].response_sum);
+                        mdm.percent = Convert.ToInt32(mdat.data[j].percent);
+                        mdm.question = mdat.data[j].question;
+                        mdm.state = mdat.data[j].state;
+                        mdm.date = mdat.data[j].date;
+                        mdm.breakpoint = Convert.ToInt32(mdat.data[j].breakpoint);
+                        mdm.stage = mdat.data[j].stage;
+                        
+                        mData.Add(mdm);
+
+                        if (j == 0)
+                            title = mdm.answer;
+
+                    }
+
+                    dataGridView1.DataSource = mData;
+                    DataTable dt = new DataTable();
+                    dt = ListToDataTable<MapSQLModelNew>(mData);
+                    UpdateVAMapDataNew(dt);
+
+                    List<MapMetaDataModelNew> mmData = new List<MapMetaDataModelNew>();
+
+                    int numBands = mdat.breakpoints.Length + 1;
+
+                    for (int i = 0; i < numBands; i++)
+                    {
+                        MapMetaDataModelNew mmd = new MapMetaDataModelNew();
+                        mmd.VA_Data_Id = VA_Data_Id;
+                        mmd.band = i;
+                        mmd.numColorBands = numBands;
+                        mmd.Title = title;
+                        mmd.color = mdat.palette;
+
+                        if (mdat.palette == "purple")
+                            mmd.colorIndex = 0;
+                        if (mdat.palette == "green")
+                            mmd.colorIndex = 1;
+                        if (mdat.palette == "orange")
+                            mmd.colorIndex = 2;
+
+                        int colorVal = (mmd.colorIndex * 4) + 1;
+
+                        switch (i)
+                        {
+                            case 0:
+                                mmd.bandLo = mdat.lower_limit;
+                                mmd.bandHi = mdat.breakpoints[i] - 1;
+                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
+                                mmd.colorValue = colorVal + i;
+                                break;
+
+                            case 1:
+                                mmd.bandLo = mdat.breakpoints[i - 1];
+                                mmd.bandHi = mdat.breakpoints[i] - 1;
+                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
+                                mmd.colorValue = colorVal + i;
+                                break;
+
+                            case 2:
+                                mmd.bandLo = mdat.breakpoints[i - 1];
+                                if (numBands == 3)
+                                    mmd.bandHi = mdat.upper_limit;
+                                else 
+                                    mmd.bandHi = mdat.breakpoints[i] - 1;
+                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
+                                mmd.colorValue = colorVal + i;
+                                break;
+
+                            case 3:
+                                mmd.bandLo = mdat.breakpoints[i - 1];
+                                mmd.bandHi = mdat.upper_limit;
+                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
+                                mmd.colorValue = colorVal + i;
+                                break;
+
+                        }
+                        mmData.Add(mmd);
+
+
+                    }
+
+                    DataTable dt1 = new DataTable();
+                    dt1 = ListToDataTable<MapMetaDataModelNew>(mmData);
+                    //UpdateVAMapDataNew(dt);
+
+                }
+                else
+                {
+                    listBox2.Items.Add($"Data error for M: {race}");
+                    log.Error($"Data error for M: {race}");
+                }
+
+                
+                //url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[2]}{race}";
+                //jsonData = SendAPIRequest(url);
+
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error processing Map Data: {race}  {ex}");
+            }
+
+        }
+
 
         public void ProcessMapData(string json, string race)
         {
@@ -2805,6 +3006,11 @@ namespace VoterAnalysisParser
                 fullTick = "manual";
                 faq = "manual";
             }
+            else if (qa[0] == "map")
+            {
+                fullTick = "map";
+                faq = "map";
+            }
             else
             {
                 fullTick = qa[0];
@@ -2822,6 +3028,14 @@ namespace VoterAnalysisParser
                 test.election_event = "2020_Primaries";
 
             }
+            else if (faq == "map")
+            {
+                test.request_type = "map";
+                test.stack_type = "";
+                test.method = "data";
+                test.id = update;
+                test.election_event = "2020_Primaries";
+            }
             else
             {
                 test.request_type = "stack";
@@ -2836,6 +3050,7 @@ namespace VoterAnalysisParser
             //DeleteDataNew(update, false);
 
             string JSONrequest = JsonConvert.SerializeObject(test);
+            log.Info(JSONrequest);
 
             string result = SendAPIPostRequest(JSONrequest);
             string jsonData = result;
@@ -2867,6 +3082,9 @@ namespace VoterAnalysisParser
                     ProcessQuestionDataNew(jsonData, update, fullTick);
                 else if (faq == "manual")
                     ProcessManualDataNew(jsonData, update, fullTick);
+                else if (faq == "map")
+                    ProcessMapDataNew(jsonData, update);
+                
             }
             
         }
@@ -3485,7 +3703,7 @@ namespace VoterAnalysisParser
 
                 VAPostModel test = new VAPostModel();
 
-                if (type > 4)
+                if (type > 5)
                     type = 0;
 
                 switch (type)
@@ -3514,8 +3732,9 @@ namespace VoterAnalysisParser
                         test.request_type = "stack";
                         break;
                     case 5:
-                        test.stack_type = "maps";
-                        test.request_type = "stack";
+                        test.stack_type = "";
+                        test.request_type = "map";
+                        test.id = "";
                         break;
 
                 }
@@ -3525,6 +3744,8 @@ namespace VoterAnalysisParser
                 test.election_event = "2020_Primaries";
 
                 string JSONrequest = JsonConvert.SerializeObject(test);
+                //{'request_type': 'map', 'method': 'updates', 'election_event': '2020_Primaries'}
+                //{"request_type":"map","stack_type":"","method":"updates","id":null,"election_event":"2020_Primaries"}
 
                 string result = SendAPIPostRequest(JSONrequest);
 
@@ -3651,16 +3872,16 @@ namespace VoterAnalysisParser
                                     updateType = "A";
                                     break;
 
-                                case 5:
-                                    //ticker-manual
-                                    if (deleteStr == "delete")
-                                        ManualDeletes.Add(Races[i]);
-                                    else if (deleteStr == "create")
-                                        ManualUpdates.Add(Races[i]);
-                                    updateType = "M";
-                                    break;
+                                //case 5:
+                                //    //ticker-manual
+                                //    if (deleteStr == "delete")
+                                //        ManualDeletes.Add(Races[i]);
+                                //    else if (deleteStr == "create")
+                                //        ManualUpdates.Add(Races[i]);
+                                //    updateType = "M";
+                                //    break;
 
-                                case 6:
+                                case 5:
                                     //Maps
                                     if (deleteStr == "delete")
                                         MapDeletes.Add(Races[i]);
@@ -3734,15 +3955,27 @@ namespace VoterAnalysisParser
             }
             else if (updateType == "M")
             {
-                // process all answers
+                // process all manual
                 n = ManualUpdates.Count;
                 for (int i = 0; i < n; i++)
                     ProcessUpdate(ManualUpdates[i]);
 
-                // process all answer deletes
+                // process all manual deletes
                 n = ManualDeletes.Count;
                 for (int i = 0; i < n; i++)
                     DeleteDataNew(ManualDeletes[i], true);
+            }
+            else if (updateType == "X")
+            {
+                // process all maps
+                n = MapUpdates.Count;
+                for (int i = 0; i < n; i++)
+                    ProcessUpdate(MapUpdates[i]);
+
+                // process all map deletes
+                n = MapDeletes.Count;
+                for (int i = 0; i < n; i++)
+                    DeleteDataNew(MapDeletes[i], true);
             }
 
 
