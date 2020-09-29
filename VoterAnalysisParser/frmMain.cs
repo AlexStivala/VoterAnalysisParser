@@ -52,6 +52,8 @@ namespace VoterAnalysisParser
         public string testbaseUrl = "https://khy8ymj127.execute-api.us-east-1.amazonaws.com/test";
 
         bool prodMode = Properties.Settings.Default.ProdMode;
+        public string electionEvent = Properties.Settings.Default.electionEvent;
+        public string useURL = Properties.Settings.Default.useURL;
 
 
         public class StateInfo
@@ -124,7 +126,24 @@ namespace VoterAnalysisParser
 
             log.Info($" ********** VoterAnalysisParser Started {version} **********");
             
-            if (prodMode)
+            //if (prodMode)
+            //{
+            //    baseUrl = Properties.Settings.Default.URL_Prod;
+            //    apiKey = Properties.Settings.Default.api_key_Prod;
+            //    dbConn = Properties.Settings.Default.dbConn_Prod;
+            //    btnAPI.Text = "Switch to Test API";
+            //    lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
+            //}
+            //else
+            //{
+            //    baseUrl = Properties.Settings.Default.URL_QA;
+            //    apiKey = Properties.Settings.Default.api_key_QA;
+            //    dbConn = Properties.Settings.Default.dbConn_QA;
+            //    btnAPI.Text = "Switch to Prod API";
+            //    lblBaseUrl.Text = $"Using Test API: {baseUrl}";
+            //}
+
+            if (useURL == "prod")
             {
                 baseUrl = Properties.Settings.Default.URL_Prod;
                 apiKey = Properties.Settings.Default.api_key_Prod;
@@ -132,15 +151,30 @@ namespace VoterAnalysisParser
                 btnAPI.Text = "Switch to Test API";
                 lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
             }
-            else
+            else if (useURL == "qa")
             {
                 baseUrl = Properties.Settings.Default.URL_QA;
                 apiKey = Properties.Settings.Default.api_key_QA;
                 dbConn = Properties.Settings.Default.dbConn_QA;
                 btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"Using Test API: {baseUrl}";
+                lblBaseUrl.Text = $"Using QA API: {baseUrl}";
             }
-
+            else if (useURL == "dev")
+            {
+                baseUrl = Properties.Settings.Default.URL_Dev;
+                apiKey = Properties.Settings.Default.api_key_Dev;
+                dbConn = Properties.Settings.Default.dbConn_QA;
+                btnAPI.Text = "Switch to Prod API";
+                lblBaseUrl.Text = $"Using Dev API: {baseUrl}";
+            }
+            else if (useURL == "stg")
+            {
+                baseUrl = Properties.Settings.Default.URL_Stg;
+                apiKey = Properties.Settings.Default.api_key_Stg;
+                dbConn = Properties.Settings.Default.dbConn_QA;
+                btnAPI.Text = "Switch to Prod API";
+                lblBaseUrl.Text = $"Using Stg API: {baseUrl}";
+            }
 
             var builder = new SqlConnectionStringBuilder(dbConn);
             var dataSource = builder.DataSource;
@@ -881,6 +915,54 @@ namespace VoterAnalysisParser
             return "";
         }
 
+        public int getPrevNumBands(string pk)
+        {
+            DataTable dt = new DataTable();
+            string cmd = $"SELECT * FROM FE_VoterAnalysis_Map_Defs_New Where VA_Data_ID = '{pk}'";
+            dt = GetDBData(cmd, dbConn);
+
+            int numBands = dt.Rows.Count;
+            return numBands;
+           
+        }
+
+        public void deleteMapMetaDataRecords(string pk, int index)
+        {
+            string delCmd = $"DELETE FROM FE_VoterAnalysis_Map_Defs_New WHERE VA_Data_Id = '{pk}' and Band > {index}";
+            IssueSQLCmd(delCmd);
+        }
+
+        public List<MapMetaDataModelNew> getMapMetaData(string pk)
+        {
+            DataTable dt = new DataTable();
+            string cmd = $"SELECT * FROM FE_VoterAnalysis_Map_Defs_New Where VA_Data_ID = '{pk}'";
+            dt = GetDBData(cmd, dbConn);
+
+            int numBands = dt.Rows.Count;
+            
+            List<MapMetaDataModelNew> mmData = new List<MapMetaDataModelNew>();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                MapMetaDataModelNew mmd = new MapMetaDataModelNew();
+
+                mmd.VA_Data_Id = row["VA_Data_Id"].ToString();
+                mmd.color = row["Color"].ToString();
+                mmd.colorIndex = Convert.ToInt32(row["ColorIndex"]);
+                mmd.colorValue = Convert.ToInt32(row["ColorValue"]);
+                mmd.numColorBands = Convert.ToInt32(row["NumBands"]);
+                mmd.bandLo = Convert.ToInt32(row["BandLo"]);
+                mmd.bandHi = Convert.ToInt32(row["BandHi"]);
+                mmd.bandLabel = row["BandLbl"].ToString();
+                mmd.Title = row["Title"].ToString();
+
+                mmData.Add(mmd);
+            }
+
+            return mmData;
+
+
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -1600,6 +1682,79 @@ namespace VoterAnalysisParser
             }
 
         }
+
+        public void UpdateVAMapMetaDataNew(MapMetaDataModelNew mmd)
+        {
+            string spName = "spUpsert_VoterAnalysis_Map_Defs_New ";
+            string cmdStr = $"{spName} ";
+            
+            try
+            {
+                // Instantiate the connection
+                using (SqlConnection connection = new SqlConnection(dbConn))
+                {
+                    connection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter())
+                    {
+                        using (SqlCommand cmd = new SqlCommand())
+                        {
+                            SqlTransaction transaction;
+                            // Start a local transaction.
+                            transaction = connection.BeginTransaction("Update Voter Analysis Map Data");
+
+                            // Must assign both transaction object and connection 
+                            // to Command object for a pending local transaction
+                            cmd.Connection = connection;
+                            cmd.Transaction = transaction;
+
+                            try
+                            {
+                                //Specify base command
+                                cmd.CommandText = cmdStr;
+
+                                cmd.Parameters.Add("@VA_Data_ID", SqlDbType.NVarChar).Value = mmd.VA_Data_Id;
+                                cmd.Parameters.Add("@Color", SqlDbType.NVarChar).Value = mmd.color;
+                                cmd.Parameters.Add("@ColorIndex", SqlDbType.Int).Value = mmd.colorIndex;
+                                cmd.Parameters.Add("@ColorValue", SqlDbType.Int).Value = mmd.colorValue;
+                                cmd.Parameters.Add("@NumBands", SqlDbType.Int).Value = mmd.numColorBands;
+                                cmd.Parameters.Add("@Band", SqlDbType.Int).Value = mmd.band;
+                                cmd.Parameters.Add("@BandLo", SqlDbType.Int).Value = mmd.bandLo;
+                                cmd.Parameters.Add("@BandHi", SqlDbType.Int).Value = mmd.bandHi;
+                                cmd.Parameters.Add("@BandLbl", SqlDbType.NVarChar).Value = mmd.bandLabel;
+                                cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = mmd.Title;
+
+                                sqlDataAdapter.SelectCommand = cmd;
+                                sqlDataAdapter.SelectCommand.Connection = connection;
+                                sqlDataAdapter.SelectCommand.CommandType = CommandType.StoredProcedure;
+
+                                // Execute stored proc 
+                                sqlDataAdapter.SelectCommand.ExecuteNonQuery();
+
+                                //Attempt to commit the transaction
+                                transaction.Commit();
+                            }
+                            catch (Exception ex)
+                            {
+                                transaction.Rollback();
+                                //textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
+                                log.Error("UpdateData- SQL Command Exception occurred: " + ex.Message);
+                                //log.Debug("UpdateData- SQL Command Exception occurred", ex);
+                            }
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("UpdateData- SQL Connection Exception occurred: " + ex.Message);
+                //textBox1.Text = "Update Map Data - SQL Command Exception occurred: " + ex.Message;
+
+            }
+
+        }
+
+
         public void UpdateVAMapDataNew(DataTable dt)
         {
             string spName = "spUpdate_VoterAnalysisData_Map_New";
@@ -2691,9 +2846,13 @@ namespace VoterAnalysisParser
                     dt = ListToDataTable<MapSQLModelNew>(mData);
                     UpdateVAMapDataNew(dt);
 
-                    List<MapMetaDataModelNew> mmData = new List<MapMetaDataModelNew>();
-
+                    
                     int numBands = mdat.breakpoints.Length + 1;
+                    int numRec = getPrevNumBands(VA_Data_Id);
+                    if (numRec > numBands)
+                        deleteMapMetaDataRecords(VA_Data_Id, numBands);
+                    
+                    List<MapMetaDataModelNew> mmData = new List<MapMetaDataModelNew>();
 
                     for (int i = 0; i < numBands; i++)
                     {
@@ -2748,13 +2907,11 @@ namespace VoterAnalysisParser
 
                         }
                         mmData.Add(mmd);
+                        UpdateVAMapMetaDataNew(mmd);
 
 
                     }
-
-                    DataTable dt1 = new DataTable();
-                    dt1 = ListToDataTable<MapMetaDataModelNew>(mmData);
-                    //UpdateVAMapDataNew(dt);
+                    SendReceipt(VA_Data_Id);
 
                 }
                 else
@@ -2892,7 +3049,7 @@ namespace VoterAnalysisParser
 
             test.method = "updates";
             //test.election_event = "2018_Midterms";
-            test.election_event = "2020_Primaries";
+            test.election_event = electionEvent;
 
             string JSONrequest = JsonConvert.SerializeObject(test);
 
@@ -3025,7 +3182,7 @@ namespace VoterAnalysisParser
                 test.stack_type = "";
                 test.method = "data";
                 test.id = update;
-                test.election_event = "2020_Primaries";
+                test.election_event = electionEvent;
 
             }
             else if (faq == "map")
@@ -3034,7 +3191,7 @@ namespace VoterAnalysisParser
                 test.stack_type = "";
                 test.method = "data";
                 test.id = update;
-                test.election_event = "2020_Primaries";
+                test.election_event = electionEvent;
             }
             else
             {
@@ -3042,7 +3199,7 @@ namespace VoterAnalysisParser
                 test.stack_type = method;
                 test.method = "data";
                 test.id = update;
-                test.election_event = "2020_Primaries";
+                test.election_event = electionEvent;
             }
 
             log.Info($"");
@@ -3101,12 +3258,23 @@ namespace VoterAnalysisParser
             if (Races.Length > 1)
             {
                 string method = Races[3];
-
-                test.request_type = "stack";
-                test.stack_type = method;
-                test.method = "receipt";
-                test.id = update;
-                test.election_event = "2020_Primaries";
+                if (method == "map")
+                {
+                    //{'request_type': 'map', 'method': 'receipt', 'id': '2020_Primaries:Voters:age:2', 'election_event': '2020_Primaries'}
+                    test.request_type = "map";
+                    test.stack_type = "";
+                    test.method = "receipt";
+                    test.id = update;
+                    test.election_event = electionEvent;
+                }
+                else
+                {
+                    test.request_type = "stack";
+                    test.stack_type = method;
+                    test.method = "receipt";
+                    test.id = update;
+                    test.election_event = electionEvent;
+                }
             }
             else
             {
@@ -3114,13 +3282,14 @@ namespace VoterAnalysisParser
                 test.stack_type = "";
                 test.method = "receipt";
                 test.id = update;
-                test.election_event = "2020_Primaries";
+                test.election_event = electionEvent;
 
             }
-
+            
             string JSONrequest = JsonConvert.SerializeObject(test);
 
-            string result = SendAPIPostRequest(JSONrequest);
+            string result = "";
+            result = SendAPIPostRequest(JSONrequest);
 
             log.Info($"SendReceipt: {result}");
             log.Info($"");
@@ -3149,7 +3318,7 @@ namespace VoterAnalysisParser
             test.stack_type = "";
             test.method = "receipt";
             test.id = update;
-            test.election_event = "2020_Primaries";
+            test.election_event = electionEvent;
 
 
             string JSONrequest = JsonConvert.SerializeObject(test);
@@ -3625,7 +3794,7 @@ namespace VoterAnalysisParser
             listBox1.Items.Clear();
             VAPostModel test = new VAPostModel();
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 5; i++)
             {
                 test.request_type = "stack";
                 if (i == 0)
@@ -3636,20 +3805,25 @@ namespace VoterAnalysisParser
                     test.stack_type = "ticker-answer";
                 if (i == 3)
                     test.stack_type = "ticker-question";
-
-
-
+                if (i == 4)
+                {
+                    //{ 'request_type': 'map', 'method': 'refresh', 'election_event': '2020_General'}
+                    test.request_type = "map";
+                    test.stack_type = "";
+                }
 
 
                 test.method = "refresh";
                 //test.election_event = "2018_Midterms";
-                test.election_event = "2020_Primaries";
+                test.election_event = electionEvent;
 
 
                 string JSONrequest = JsonConvert.SerializeObject(test);
                 string result = SendAPIPostRequest(JSONrequest);
 
                 string s = $"Refreshed {test.stack_type}";
+                if (i == 4)
+                    s = $"Refreshed {"map"}";
                 if (this.InvokeRequired)
                     this.Invoke(new ListErr(writeListbox2), s);
                 else
@@ -3741,7 +3915,7 @@ namespace VoterAnalysisParser
 
                 //test.request_type = "stack";
                 test.method = "updates";
-                test.election_event = "2020_Primaries";
+                test.election_event = electionEvent;
 
                 string JSONrequest = JsonConvert.SerializeObject(test);
                 //{'request_type': 'map', 'method': 'updates', 'election_event': '2020_Primaries'}

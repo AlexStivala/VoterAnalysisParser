@@ -88,5 +88,59 @@ namespace VoterAnalysisParser.Properties {
                 return ((bool)(this["ProdMode"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://c59epy4bbl.execute-api.us-east-1.amazonaws.com/dev/edspost")]
+        public string URL_Dev {
+            get {
+                return ((string)(this["URL_Dev"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("213lxJEq7m1bkcmT2w34x1kj1KCep2j9ES91nrBj")]
+        public string api_key_Dev {
+            get {
+                return ((string)(this["api_key_Dev"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://0tkvnhl1q3.execute-api.us-east-2.amazonaws.com/stg/edspost")]
+        public string URL_Stg {
+            get {
+                return ((string)(this["URL_Stg"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("pZXVLzYcvP3avlnH1n6ND9NCtLWMbivOaOhzLD8k")]
+        public string api_key_Stg {
+            get {
+                return ((string)(this["api_key_Stg"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2020_General")]
+        public string electionEvent {
+            get {
+                return ((string)(this["electionEvent"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("stg")]
+        public string useURL {
+            get {
+                return ((string)(this["useURL"]));
+            }
+        }
     }
 }

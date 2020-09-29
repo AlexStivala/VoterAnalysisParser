@@ -27,5 +27,23 @@
     <Setting Name="ProdMode" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="URL_Dev" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://c59epy4bbl.execute-api.us-east-1.amazonaws.com/dev/edspost</Value>
+    </Setting>
+    <Setting Name="api_key_Dev" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">213lxJEq7m1bkcmT2w34x1kj1KCep2j9ES91nrBj</Value>
+    </Setting>
+    <Setting Name="URL_Stg" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://0tkvnhl1q3.execute-api.us-east-2.amazonaws.com/stg/edspost</Value>
+    </Setting>
+    <Setting Name="api_key_Stg" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">pZXVLzYcvP3avlnH1n6ND9NCtLWMbivOaOhzLD8k</Value>
+    </Setting>
+    <Setting Name="electionEvent" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">2020_General</Value>
+    </Setting>
+    <Setting Name="useURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">stg</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

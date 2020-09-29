@@ -21,7 +21,7 @@ namespace VoterAnalysisParser
         public string State { get; set; }
         public string race_id { get; set; }
         public string ofc { get; set; }
-        public int sample_size { get; set; }
+        public float sample_size { get; set; }
         public float total_weight { get; set; }
         public string preface { get; set; }
         public string header { get; set; }
