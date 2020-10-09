@@ -2877,15 +2877,11 @@ namespace VoterAnalysisParser
                             case 0:
                                 mmd.bandLo = mdat.lower_limit;
                                 mmd.bandHi = mdat.breakpoints[i] - 1;
-                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
-                                mmd.colorValue = colorVal + i;
                                 break;
 
                             case 1:
                                 mmd.bandLo = mdat.breakpoints[i - 1];
                                 mmd.bandHi = mdat.breakpoints[i] - 1;
-                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
-                                mmd.colorValue = colorVal + i;
                                 break;
 
                             case 2:
@@ -2894,18 +2890,17 @@ namespace VoterAnalysisParser
                                     mmd.bandHi = mdat.upper_limit;
                                 else 
                                     mmd.bandHi = mdat.breakpoints[i] - 1;
-                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
-                                mmd.colorValue = colorVal + i;
                                 break;
 
                             case 3:
                                 mmd.bandLo = mdat.breakpoints[i - 1];
                                 mmd.bandHi = mdat.upper_limit;
-                                mmd.bandLabel = $"{mmd.bandLo} - {mmd.bandHi}";
-                                mmd.colorValue = colorVal + i;
                                 break;
 
                         }
+                        mmd.bandLabel = $"{mmd.bandLo}% - {mmd.bandHi}%";
+                        mmd.colorValue = colorVal + i;
+
                         mmData.Add(mmd);
                         UpdateVAMapMetaDataNew(mmd);
 
@@ -2913,11 +2908,23 @@ namespace VoterAnalysisParser
                     }
                     SendReceipt(VA_Data_Id);
 
+                    string s = $"M: {VA_Data_Id}  OK";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
+
                 }
                 else
                 {
-                    listBox2.Items.Add($"Data error for M: {race}");
                     log.Error($"Data error for M: {race}");
+
+                    string s = $"Data error for Q: {VA_Data_Id}";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
+
                 }
 
                 
@@ -2928,6 +2935,11 @@ namespace VoterAnalysisParser
             catch (Exception ex)
             {
                 log.Error($"Error processing Map Data: {race}  {ex}");
+                string s = $"Error processing Map Data: {race}";
+                if (this.InvokeRequired)
+                    this.Invoke(new ListErr(writeListbox2), s);
+                else
+                    listBox2.Items.Add(s);
             }
 
         }
@@ -3374,16 +3386,22 @@ namespace VoterAnalysisParser
                         else
                             sq.question = questions.question;
                         
-                        sq.race_type = questions.race_type;
                         sq.qcode = questions.qcode;
                         sq.filter = questions.filter;
-                        sq.sample_size = Convert.ToInt32(questions.sample_size);
+                        sq.sample_size = (int)Convert.ToSingle(questions.sample_size);
                         sq.total_weight = Convert.ToSingle(questions.total_weight);
 
                         if (questions.race_type == "all")
+                        {
                             sq.ofc = "A";
+                            sq.race_type = questions.race_type.Substring(0, 2);
+                        }
                         else
+                        {
                             sq.ofc = questions.race_type;
+                            sq.race_type = questions.race_type;
+
+                        }
 
                         sq.preface = questions.preface;
                         sq.header = questions.header;
@@ -3391,8 +3409,8 @@ namespace VoterAnalysisParser
                         sq.election_event = questions.election_event;
 
 
-                        sq.variable_weight = Convert.ToSingle(questions.h_answers[j].variable_weight);
-                        sq.variable_count = Convert.ToInt32(questions.h_answers[j].variable_count);
+                        sq.variable_weight = (int)Convert.ToSingle(questions.h_answers[j].variable_weight);
+                        sq.variable_count =  (int)Convert.ToSingle(questions.h_answers[j].variable_count);
                         sq.variable_percent = Convert.ToInt32(questions.h_answers[j].variable_percent);
                         sq.original_order = Convert.ToInt32(questions.h_answers[j].original_order);
                         
@@ -3448,6 +3466,12 @@ namespace VoterAnalysisParser
             {
                 log.Info($"");
                 log.Error($"Error processing Question Data: {update}  {ex}");
+                string s = $"Error processing Question Data: {update}";
+                if (this.InvokeRequired)
+                    this.Invoke(new ListErr(writeListbox2), s);
+                else
+                    listBox2.Items.Add(s);
+
             }
         }
 
@@ -3681,12 +3705,17 @@ namespace VoterAnalysisParser
 
                             sq.st = answers.state;
                             sq.State = GetStateName(sq.st);
-                            sq.race_type = answers.race_type;
                             sq.race_id = answers.race_id;
                             if (answers.race_type == "all")
+                            {
                                 sq.ofc = "A";
+                                sq.race_type = answers.race_type.Substring(0, 2);
+                            }
                             else
+                            {
                                 sq.ofc = answers.race_type;
+                                sq.race_type = answers.race_type;
+                            }
 
                             sq.sample_size = Convert.ToInt32(answers.sample_size);
                             sq.total_weight = Convert.ToSingle(answers.total_weight);
@@ -3785,6 +3814,11 @@ namespace VoterAnalysisParser
             catch (Exception ex)
             {
                 log.Error($"Error getting Answer Data: {update}  {ex}");
+                string s = $"Error getting Answer Data: {update}";
+                if (this.InvokeRequired)
+                    this.Invoke(new ListErr(writeListbox2), s);
+                else
+                    listBox2.Items.Add(s);
             }
         }
 
