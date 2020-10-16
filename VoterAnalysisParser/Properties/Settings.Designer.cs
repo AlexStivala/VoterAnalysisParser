@@ -62,7 +62,8 @@ namespace VoterAnalysisParser.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User " +
-            "ID=gfxuser;Password=elect2018")]
+            "ID=electProduction;Password=fng2-Pr3s1d3nt@2020;Encrypt=True;TrustServerCertific" +
+            "ate=False")]
         public string dbConn_QA {
             get {
                 return ((string)(this["dbConn_QA"]));
@@ -73,7 +74,8 @@ namespace VoterAnalysisParser.Properties {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
         [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User " +
-            "ID=gfxuser;Password=elect2018")]
+            "ID=electProduction;Password=fng2-Pr3s1d3nt@2020;Encrypt=True;TrustServerCertific" +
+            "ate=False")]
         public string dbConn_Prod {
             get {
                 return ((string)(this["dbConn_Prod"]));

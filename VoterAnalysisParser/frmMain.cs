@@ -3047,6 +3047,12 @@ namespace VoterAnalysisParser
                 test.stack_type = "";
                 test.request_type = "manual";
             }
+            if (rbMaps.Checked)
+            {
+                test.request_type = "map";
+                test.stack_type = "";
+            }
+
 
             // clear updates lists
             QuestionDeletes.Clear();
@@ -3095,6 +3101,7 @@ namespace VoterAnalysisParser
                 for (int i = 0; i < Races.Length; i++)
                 {
                     listBox1.Items.Add(Races[i]);
+                    log.Info($"Updates[{i}]: {Races[i]}");
                     pos = Races[i].IndexOf("|");
                     deleteStr = Races[i].Substring(pos + 1);
                     Races[i] = Races[i].Substring(0, pos);
@@ -3119,6 +3126,13 @@ namespace VoterAnalysisParser
                         else if (deleteStr == "create")
                             ManualUpdates.Add(Races[i]);
                     }
+                    else if (rbMaps.Checked)
+                    {
+                        if (deleteStr == "delete")
+                            MapDeletes.Add(Races[i]);
+                        else if (deleteStr == "create")
+                            MapUpdates.Add(Races[i]);
+                    }
                 }
             }
 
@@ -3135,6 +3149,8 @@ namespace VoterAnalysisParser
                 n = AnswerUpdates.Count;
             if (rbMan.Checked)
                 n = ManualUpdates.Count;
+            if (rbMaps.Checked)
+                n = MapUpdates.Count;
 
 
             for (int i = 0; i < n; i++)
@@ -3145,8 +3161,11 @@ namespace VoterAnalysisParser
                     ProcessUpdate(QuestionUpdates[i]);
                 if (rbMan.Checked)
                     ProcessUpdate(ManualUpdates[i]);
+                if (rbMaps.Checked)
+                    ProcessUpdate(MapUpdates[i]);
+
             }
-            
+
         }
         public void ProcessUpdate(string update)
         {
@@ -3717,7 +3736,7 @@ namespace VoterAnalysisParser
                                 sq.race_type = answers.race_type;
                             }
 
-                            sq.sample_size = Convert.ToInt32(answers.sample_size);
+                            sq.sample_size = (int)Convert.ToSingle(answers.sample_size);
                             sq.total_weight = Convert.ToSingle(answers.total_weight);
                             sq.preface = answers.preface;
                             sq.header = answers.header;
@@ -3725,7 +3744,7 @@ namespace VoterAnalysisParser
                             sq.election_event = answers.election_event;
 
                             sq.variable_weight = Convert.ToSingle(answers.h_answers[j].variable_weight);
-                            sq.variable_count = Convert.ToInt32(answers.h_answers[j].variable_count);
+                            sq.variable_count = (int)Convert.ToSingle(answers.h_answers[j].variable_count);
                             sq.variable_percent = Convert.ToInt32(answers.h_answers[j].variable_percent);
                             sq.original_order = Convert.ToInt32(answers.h_answers[j].original_order);
                             sq.original_name = answers.h_answers[j].original_name;
@@ -3763,7 +3782,7 @@ namespace VoterAnalysisParser
                                 sq.alias = answers.h_answers[j].results[ri - 1].alias_name;
                                 sq.new_order = ri;
                                 sq.result_weight = Convert.ToSingle(answers.h_answers[j].results[ri - 1].result_weight);
-                                sq.result_count = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_count);
+                                sq.result_count = (int)Convert.ToSingle(answers.h_answers[j].results[ri - 1].result_count);
                                 sq.result_percent = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_percent);
                                 
                                 sq.party = answers.h_answers[j].results[ri - 1].party;
@@ -3830,48 +3849,59 @@ namespace VoterAnalysisParser
 
             for (int i = 0; i < 5; i++)
             {
+                bool rf = false;
                 test.request_type = "stack";
-                if (i == 0)
+                if (i == 0 && cbFSA.Checked)
+                {
                     test.stack_type = "fullscreen-answer";
-                if (i == 1)
+                    rf = true;
+                }
+                if (i == 1 && cbFSQ.Checked)
+                {
                     test.stack_type = "fullscreen-question";
-                if (i == 2)
+                    rf = true;
+                }
+                if (i == 2 && cbTKA.Checked)
+                {
                     test.stack_type = "ticker-answer";
-                if (i == 3)
+                    rf = true;
+                }
+                if (i == 3 && cbTKQ.Checked)
+                { 
                     test.stack_type = "ticker-question";
-                if (i == 4)
+                    rf = true;
+                }
+                if (i == 4 && cbM.Checked)
                 {
                     //{ 'request_type': 'map', 'method': 'refresh', 'election_event': '2020_General'}
                     test.request_type = "map";
                     test.stack_type = "";
+                    rf = true;
                 }
 
+                if (rf)
+                {
+                    test.method = "refresh";
+                    test.election_event = electionEvent;
 
-                test.method = "refresh";
-                //test.election_event = "2018_Midterms";
-                test.election_event = electionEvent;
+                    string JSONrequest = JsonConvert.SerializeObject(test);
+                    string result = SendAPIPostRequest(JSONrequest);
 
+                    string s = $"Refreshed {test.stack_type}";
+                    if (i == 4)
+                        s = $"Refreshed {"map"}";
+                    if (this.InvokeRequired)
+                        this.Invoke(new ListErr(writeListbox2), s);
+                    else
+                        listBox2.Items.Add(s);
 
-                string JSONrequest = JsonConvert.SerializeObject(test);
-                string result = SendAPIPostRequest(JSONrequest);
-
-                string s = $"Refreshed {test.stack_type}";
-                if (i == 4)
-                    s = $"Refreshed {"map"}";
-                if (this.InvokeRequired)
-                    this.Invoke(new ListErr(writeListbox2), s);
-                else
-                    listBox2.Items.Add(s);
-
-                textBox1.Text = result;
-                string jsonData = result;
+                    textBox1.Text = result;
+                    string jsonData = result;
+                }
             }
         }
 
-        private void rbFS_CheckedChanged(object sender, EventArgs e)
-        {
 
-        }
 
         private void button17_Click(object sender, EventArgs e)
         {
@@ -3887,9 +3917,6 @@ namespace VoterAnalysisParser
                 runStop = "Start";
                 btnRunStop.Text = runStop;
             }
-
-
-
         }
 
         public void GetAllNew()
@@ -4006,6 +4033,9 @@ namespace VoterAnalysisParser
                             this.Invoke(new ListErr(writeListbox), Races[i]);
                         else
                             listBox1.Items.Add(Races[i]);
+
+                        log.Info($"Updates[{i}]: {Races[i]}");
+
 
                         updateType = "0";
                         //pos = Races[i].IndexOf("|");
@@ -4216,6 +4246,8 @@ namespace VoterAnalysisParser
 
             try
             {
+                string delCmd;
+
                 string tblName = "FE_VoterAnalysisData_FS_New";
                 string[] strSeparator = new string[] { ":" };
                 string[] Races;
@@ -4225,30 +4257,42 @@ namespace VoterAnalysisParser
                 if (Races.Length > 1)
                 {
                     string method = Races[3];
+                    if (method != "map")
+                    {
+                        strSeparator = new string[] { "-" };
+                        string[] qa;
+                        qa = method.Split(strSeparator, StringSplitOptions.None);
+                        string fullTick = qa[0];
+                        string faq = qa[1];
 
-                    strSeparator = new string[] { "-" };
-                    string[] qa;
-                    qa = method.Split(strSeparator, StringSplitOptions.None);
-                    string fullTick = qa[0];
-                    string faq = qa[1];
-                    
-                    
-                    if (fullTick == "ticker")
-                        tblName = "FE_VoterAnalysisData_TKR_New";
+
+                        if (fullTick == "ticker")
+                            tblName = "FE_VoterAnalysisData_TKR_New";
+                        else
+                            tblName = "FE_VoterAnalysisData_FS_New";
+
+                        delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
+                        IssueSQLCmd(delCmd);
+                    }
                     else
-                        tblName = "FE_VoterAnalysisData_FS_New";
+                    {
+                        tblName = "FE_VoterAnalysisData_Map_New"; 
+                        delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
+                        IssueSQLCmd(delCmd);
 
+                        tblName = "FE_VoterAnalysis_Map_Defs_New";
+                        delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
+                        IssueSQLCmd(delCmd);
+                    }
 
-
-                    //if (QnA == "M")
-                    //tblName = "FE_VoterAnalysisData_Map";
                 }
                 else
+                {
                     tblName = "FE_VoterAnalysisData_MAN_New";
+                    delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
+                    IssueSQLCmd(delCmd);
+                }
 
-
-                string delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
-                IssueSQLCmd(delCmd);
 
                 if (sendReceipt)
                 {
@@ -4297,6 +4341,77 @@ namespace VoterAnalysisParser
             }
         }
 
+        //private void button17_Click_1(object sender, EventArgs e)
+        //{
+
+        //}
+
+        private void btnRunStop_Click(object sender, EventArgs e)
+        {
+            if (runStop == "Start")
+            {
+                runStop = "Stop";
+                btnRunStop.Text = runStop;
+                Task.Run(() => GetAllNew());
+            }
+            else
+            {
+                runStop = "Start";
+                btnRunStop.Text = runStop;
+            }
+        }
+
+        private void DeleteBtn_Click(object sender, EventArgs e)
+        {
+            string delCmd;
+            string tableName;
+            for (int i = 0; i < 4; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        if (cbDelFS.Checked)
+                        {
+                            tableName = "FE_VoterAnalysisData_FS_New";
+                            delCmd = $"DELETE FROM {tableName}";
+                            IssueSQLCmd(delCmd);
+                        }
+                        break;
+
+                    case 1:
+                        if (cbDelTKR.Checked)
+                        {
+                            tableName = "FE_VoterAnalysisData_TKR_New";
+                            delCmd = $"DELETE FROM {tableName}";
+                            IssueSQLCmd(delCmd);
+                        }
+                        break;
+
+                    case 2:
+                        if (cbDelMan.Checked)
+                        {
+                            tableName = "FE_VoterAnalysisData_MAN_New";
+                            delCmd = $"DELETE FROM {tableName}";
+                            IssueSQLCmd(delCmd);
+                        }
+                        break;
+
+                    case 3:
+                        if (cbDelMaps.Checked)
+                        {
+                            tableName = "FE_VoterAnalysisData_Map_New";
+                            delCmd = $"DELETE FROM {tableName}";
+                            IssueSQLCmd(delCmd);
+
+                            tableName = "FE_VoterAnalysis_Map_Defs_New";
+                            delCmd = $"DELETE FROM {tableName}";
+                            IssueSQLCmd(delCmd);
+                        }
+                        break;
+
+                }
+            }
+        }
     }
 
 }

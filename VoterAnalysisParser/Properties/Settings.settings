@@ -15,14 +15,14 @@
       <Value Profile="(Default)">213lxJEq7m1bkcmT2w34x1kj1KCep2j9ES91nrBj</Value>
     </Setting>
     <Setting Name="dbConn_QA" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=gfxuser;Password=elect2018</Value>
+      <Value Profile="(Default)">Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=electProduction;Password=fng2-Pr3s1d3nt@2020;Encrypt=True;TrustServerCertificate=False</Value>
     </Setting>
     <Setting Name="dbConn_Prod" Type="(Connection string)" Scope="Application">
       <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;ConnectionString&gt;Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=gfxuser;Password=elect2018&lt;/ConnectionString&gt;
+  &lt;ConnectionString&gt;Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=electProduction;Password=fng2-Pr3s1d3nt@2020;Encrypt=True;TrustServerCertificate=False&lt;/ConnectionString&gt;
 &lt;/SerializableConnectionString&gt;</DesignTimeValue>
-      <Value Profile="(Default)">Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=gfxuser;Password=elect2018</Value>
+      <Value Profile="(Default)">Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=electProduction;Password=fng2-Pr3s1d3nt@2020;Encrypt=True;TrustServerCertificate=False</Value>
     </Setting>
     <Setting Name="ProdMode" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
