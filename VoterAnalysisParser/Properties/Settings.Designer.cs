@@ -43,35 +43,6 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://c59epy4bbl.execute-api.us-east-1.amazonaws.com/dev/edspost")]
-        public string URL_QA {
-            get {
-                return ((string)(this["URL_QA"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("213lxJEq7m1bkcmT2w34x1kj1KCep2j9ES91nrBj")]
-        public string api_key_QA {
-            get {
-                return ((string)(this["api_key_QA"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User " +
-            "ID=electProduction;Password=fng2-Pr3s1d3nt@2020;Encrypt=True;TrustServerCertific" +
-            "ate=False")]
-        public string dbConn_QA {
-            get {
-                return ((string)(this["dbConn_QA"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
         [global::System.Configuration.DefaultSettingValueAttribute("Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User " +
             "ID=electProduction;Password=fng2-Pr3s1d3nt@2020;Encrypt=True;TrustServerCertific" +
@@ -138,7 +109,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("stg")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Stg")]
         public string useURL {
             get {
                 return ((string)(this["useURL"]));

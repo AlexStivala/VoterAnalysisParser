@@ -27,7 +27,7 @@ namespace VoterAnalysisParser
     public delegate void TextWrite(string s);
     public delegate void TextWrite2(string s);
 
-    public partial class frmMain : Form , IAppender
+    public partial class frmMain : Form, IAppender
     {
 
         public string dbConn = "Data Source=enygdb1;Initial Catalog=ElectionProd;Persist Security Info=True;User ID=gfxuser;Password=elect2018";
@@ -125,55 +125,31 @@ namespace VoterAnalysisParser
             this.Text = String.Format("Voter Analysis Parser  Version {0}", version);
 
             log.Info($" ********** VoterAnalysisParser Started {version} **********");
-            
-            //if (prodMode)
-            //{
-            //    baseUrl = Properties.Settings.Default.URL_Prod;
-            //    apiKey = Properties.Settings.Default.api_key_Prod;
-            //    dbConn = Properties.Settings.Default.dbConn_Prod;
-            //    btnAPI.Text = "Switch to Test API";
-            //    lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
-            //}
-            //else
-            //{
-            //    baseUrl = Properties.Settings.Default.URL_QA;
-            //    apiKey = Properties.Settings.Default.api_key_QA;
-            //    dbConn = Properties.Settings.Default.dbConn_QA;
-            //    btnAPI.Text = "Switch to Prod API";
-            //    lblBaseUrl.Text = $"Using Test API: {baseUrl}";
-            //}
 
-            if (useURL == "prod")
+ 
+            if (useURL == "Prod")
             {
                 baseUrl = Properties.Settings.Default.URL_Prod;
                 apiKey = Properties.Settings.Default.api_key_Prod;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
-                btnAPI.Text = "Switch to Test API";
+                btnAPI.Text = "Switch to {useURL} API";
                 lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
             }
-            else if (useURL == "qa")
-            {
-                baseUrl = Properties.Settings.Default.URL_QA;
-                apiKey = Properties.Settings.Default.api_key_QA;
-                dbConn = Properties.Settings.Default.dbConn_QA;
-                btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"Using QA API: {baseUrl}";
-            }
-            else if (useURL == "dev")
+            else if (useURL == "Dev")
             {
                 baseUrl = Properties.Settings.Default.URL_Dev;
                 apiKey = Properties.Settings.Default.api_key_Dev;
-                dbConn = Properties.Settings.Default.dbConn_QA;
+                dbConn = Properties.Settings.Default.dbConn_Prod;
                 btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"Using Dev API: {baseUrl}";
+                lblBaseUrl.Text = $"URL: {useURL}:   {baseUrl}";
             }
-            else if (useURL == "stg")
+            else if (useURL == "Stg")
             {
                 baseUrl = Properties.Settings.Default.URL_Stg;
                 apiKey = Properties.Settings.Default.api_key_Stg;
-                dbConn = Properties.Settings.Default.dbConn_QA;
+                dbConn = Properties.Settings.Default.dbConn_Prod;
                 btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"Using Stg API: {baseUrl}";
+                lblBaseUrl.Text = $"URL: {useURL}:   {baseUrl}";
             }
 
             var builder = new SqlConnectionStringBuilder(dbConn);
@@ -206,7 +182,7 @@ namespace VoterAnalysisParser
 
             try
             {
-                
+
                 //string race = "IL-G-91912";
                 //string raceID = "91912";
                 //string state = "IL";
@@ -224,7 +200,7 @@ namespace VoterAnalysisParser
                 // parse the header info
                 string[] strSeparator = new string[] { "-" };
                 string[] raceStrings;
-                
+
                 // this takes the header and splits it into key-value pairs
                 raceStrings = race.Split(strSeparator, StringSplitOptions.None);
 
@@ -271,21 +247,21 @@ namespace VoterAnalysisParser
                         mxID += 5000;
                         break;
                 }
-                   
+
 
 
                 List<deNorm_Xtabs> dnXt = new List<deNorm_Xtabs>();
 
                 int cnt = 0;
 
-               
-               for (int i = 0; i < questions.Count(); i++)
-                    {
-                        label1.Text = i.ToString();
+
+                for (int i = 0; i < questions.Count(); i++)
+                {
+                    label1.Text = i.ToString();
 
                     for (int j = 0; j < questions[i].h_answers.Count<VADataModel.Answer>(); j++)
                     {
-                        
+
                         for (int ri = 0; ri < questions[i].h_answers[j].results.Count() + 1; ri++)
                         {
                             deNorm_Xtabs dn = new deNorm_Xtabs();
@@ -296,7 +272,7 @@ namespace VoterAnalysisParser
                                 cnt++;
                                 label2.Text = cnt.ToString();
                                 //if (cnt == 2406)
-                                    //label2.Text = "check";
+                                //label2.Text = "check";
                                 dn.transSrc = "E";
                                 dn.eDate = "20181106";
                                 dn.st = stateID;
@@ -348,7 +324,7 @@ namespace VoterAnalysisParser
                                 dn.xpCall = 0;
                                 dn.xpStage = 0;
                                 dn.onAirTemplateID = 0;
-                                
+
                                 if (ri == 0)
                                 {
                                     dn.cID = 0;
@@ -365,7 +341,7 @@ namespace VoterAnalysisParser
                                 }
                                 else
                                 {
-                                    
+
                                     if (int.TryParse(questions[i].h_answers[j].results[ri - 1].id, out parsedResult))
                                         dn.cID = parsedResult;
                                     else
@@ -373,7 +349,7 @@ namespace VoterAnalysisParser
 
                                     dn.candLastName = questions[i].h_answers[j].results[ri - 1].name.Trim();
 
-                                    
+
                                     if (int.TryParse((questions[i].h_answers[j].results[ri - 1].result_percent), out parsedResult))
                                     {
                                         dn.cPct = 0;
@@ -423,7 +399,7 @@ namespace VoterAnalysisParser
         {
             try
             {
-                
+
                 //string race = tbRace.Text.Trim();
 
                 // parse the header info
@@ -645,7 +621,7 @@ namespace VoterAnalysisParser
                     }
                     dt.Columns.Add(col);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     var err = ex.Message;
 
@@ -668,7 +644,7 @@ namespace VoterAnalysisParser
         {
             string spName = "spUpdate_XTabs";
             string cmdStr = $"{spName} ";
-            
+
             //Save out the top-level metadata
             try
             {
@@ -695,11 +671,11 @@ namespace VoterAnalysisParser
                                 cmd.CommandText = cmdStr;
 
                                 cmd.Parameters.Add("@tblXtabs", SqlDbType.Structured).Value = dt;
-                                
+
                                 sqlDataAdapter.SelectCommand = cmd;
                                 sqlDataAdapter.SelectCommand.Connection = connection;
                                 sqlDataAdapter.SelectCommand.CommandType = CommandType.StoredProcedure;
-                                
+
                                 // Execute stored proc 
                                 sqlDataAdapter.SelectCommand.ExecuteNonQuery();
 
@@ -732,7 +708,7 @@ namespace VoterAnalysisParser
             textBox1.Clear();
             string jsonData = GetVAData(tbRace.Text.Trim());
             textBox1.Text = jsonData;
-            
+
         }
 
         private string GetVAData(string race)
@@ -744,7 +720,7 @@ namespace VoterAnalysisParser
             //string race = tbRace.Text.Trim();
             var jsonResponse = "";
             string WEBSERVICE_URL = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=xtab&race={race}&list_results=true2&list_answers=true";
-            
+
             try
             {
                 stopWatch.Start();
@@ -763,7 +739,7 @@ namespace VoterAnalysisParser
                             //Console.WriteLine(String.Format("Response: {0}", jsonResponse));
                         }
                     }
-                    
+
                 }
                 ts = stopWatch.Elapsed;
                 //label2.Text = $"Time to read dataset: {ts.Milliseconds} msec";
@@ -774,7 +750,7 @@ namespace VoterAnalysisParser
             {
                 Console.WriteLine(ex.ToString());
             }
-            
+
             return jsonResponse;
 
         }
@@ -879,9 +855,9 @@ namespace VoterAnalysisParser
                     stateAbbv = row["State_Abbv"].ToString() ?? "",
                     stateName = row["State_Name"].ToString() ?? "",
                     stateID = Convert.ToInt32(row["State_ID"] ?? "")
-                    
+
                 };
-                
+
                 stateData.Add(sd);
             }
 
@@ -923,12 +899,12 @@ namespace VoterAnalysisParser
 
             int numBands = dt.Rows.Count;
             return numBands;
-           
+
         }
 
         public void deleteMapMetaDataRecords(string pk, int index)
         {
-            string delCmd = $"DELETE FROM FE_VoterAnalysis_Map_Defs_New WHERE VA_Data_Id = '{pk}' and Band > {index}";
+            string delCmd = $"DELETE FROM FE_VoterAnalysis_Map_Defs_New WHERE VA_Data_Id = '{pk}' and Band >= {index}";
             IssueSQLCmd(delCmd);
         }
 
@@ -939,7 +915,7 @@ namespace VoterAnalysisParser
             dt = GetDBData(cmd, dbConn);
 
             int numBands = dt.Rows.Count;
-            
+
             List<MapMetaDataModelNew> mmData = new List<MapMetaDataModelNew>();
 
             foreach (DataRow row in dt.Rows)
@@ -977,7 +953,7 @@ namespace VoterAnalysisParser
                 string jsonData = GetRaceList();
                 textBox1.Text = jsonData;
 
-                string racesWithData = jsonData.Replace("\"","");
+                string racesWithData = jsonData.Replace("\"", "");
                 jsonData = racesWithData;
                 racesWithData = jsonData.Replace("[", "");
                 jsonData = racesWithData;
@@ -1028,7 +1004,7 @@ namespace VoterAnalysisParser
         {
             string VAData;
             GetRaces();
-            foreach(RaceListModel race in raceList)
+            foreach (RaceListModel race in raceList)
             {
                 VAData = GetVAData(race.race_id);
                 ProcessData(race.race_id, VAData);
@@ -1060,7 +1036,7 @@ namespace VoterAnalysisParser
                 n = 2;
             else
                 n = 0;
-                
+
             string url = $"{baseUrl}{stacktype}{stackTypes[n]}{calltype}{callTypes[0]}";
 
 
@@ -1143,14 +1119,14 @@ namespace VoterAnalysisParser
 
             try
             {
-                HttpClient client = new HttpClient(); 
-                
+                HttpClient client = new HttpClient();
+
                 var content = new StringContent(requestJson.ToString(), Encoding.UTF8, "application/json");
 
                 //requestMessage.Headers.Add("x-api-key", newapiKey);
                 requestMessage.Headers.Add("x-api-key", apiKey);
                 requestMessage.Content = new StringContent(requestJson.ToString(), Encoding.UTF8, "application/json");
-                
+
                 //client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
                 client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
@@ -1235,9 +1211,9 @@ namespace VoterAnalysisParser
         {
             try
             {
-            
+
                 string json = textBox1.Text;
-                
+
                 VAQuestionModel questions = new VAQuestionModel();
                 questions = JsonConvert.DeserializeObject<VAQuestionModel>(json);
 
@@ -1333,8 +1309,8 @@ namespace VoterAnalysisParser
             //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_question&call_type=data&id={race}";
             //if (rbFS.Checked)
             //{
-                //dataType = 1;
-                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=data&id={race}";
+            //dataType = 1;
+            //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=data&id={race}";
             //}
             //string jsonData = SendAPIRequest1(url, race);
 
@@ -1414,17 +1390,17 @@ namespace VoterAnalysisParser
             //string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=data&id={race}";
             //if (rbFS.Checked)
             //{
-                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=data&id={race}";
-                //dataType = 1;
+            //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=data&id={race}";
+            //dataType = 1;
             //}
 
 
             dataType = 0;
-            
+
             if (rbFS.Checked)
             {
                 dataType = 1;
-                
+
             }
 
             int n = dataType * 2 + 1;
@@ -1440,7 +1416,7 @@ namespace VoterAnalysisParser
         {
             try
             {
-                
+
                 string json = textBox1.Text;
 
                 VAAnswerModel answers = new VAAnswerModel();
@@ -1621,7 +1597,7 @@ namespace VoterAnalysisParser
         {
             string spName = "spUpdate_VoterAnalysisData_Map";
 
-            
+
 
             string cmdStr = $"{spName} ";
 
@@ -1687,7 +1663,7 @@ namespace VoterAnalysisParser
         {
             string spName = "spUpsert_VoterAnalysis_Map_Defs_New ";
             string cmdStr = $"{spName} ";
-            
+
             try
             {
                 // Instantiate the connection
@@ -2076,9 +2052,9 @@ namespace VoterAnalysisParser
                 string url;
 
                 //if (dataType == 1)
-                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=receipt&id={race}";
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_question&call_type=receipt&id={race}";
                 //else
-                    //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_question&call_type=receipt&id={race}";
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_question&call_type=receipt&id={race}";
 
                 int nn = dataType * 2;
                 url = $"{baseUrl}{stacktype}{stackTypes[nn]}{calltype}{callTypes[2]}{race}";
@@ -2231,7 +2207,7 @@ namespace VoterAnalysisParser
                                         sq.party = answers.h_answers[j].results[ri - 1].party;
 
                                         if (sq.name == "Republican" || sq.name == "Democrat")
-                                            sq.party = sq.name.Substring(0,3);
+                                            sq.party = sq.name.Substring(0, 3);
 
 
                                         if (sq.party.Length > 3)
@@ -2269,17 +2245,17 @@ namespace VoterAnalysisParser
 
                 string url;
 
-                    //if (dataType == 1)
-                        //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=receipt&id={race}";
-                    //else
-                        //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=receipt&id={race}";
+                //if (dataType == 1)
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=fullscreen_answer&call_type=receipt&id={race}";
+                //else
+                //url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=ticker_answer&call_type=receipt&id={race}";
 
                 int nn = dataType * 2 + 1;
                 url = $"{baseUrl}{stacktype}{stackTypes[nn]}{calltype}{callTypes[2]}{race}";
 
                 string jsonData = SendAPIRequest(url);
 
-                
+
 
             }
             catch (Exception ex)
@@ -2353,7 +2329,7 @@ namespace VoterAnalysisParser
         {
             string modeStr;
             string modeCode;
-            
+
             for (int n = 0; n < 2; n++)
             {
                 dataType = n;
@@ -2514,7 +2490,7 @@ namespace VoterAnalysisParser
             listBox1.Items.Clear();
             string url = $"https://xa1faa0ebb.execute-api.us-east-1.amazonaws.com/prod/?page_type=stack&stack_type=map&call_type=updates";
 
-            
+
             string jsonData = SendAPIRequest(url);
 
             textBox1.Text = jsonData;
@@ -2680,7 +2656,7 @@ namespace VoterAnalysisParser
                 cnt = 0;
             }
             else
-                lblDataMode.Text  = $"Timer cnt: {cnt}";
+                lblDataMode.Text = $"Timer cnt: {cnt}";
         }
 
         private void button9_Click(object sender, EventArgs e)
@@ -2796,7 +2772,7 @@ namespace VoterAnalysisParser
             {
                 string VA_Data_Id = race;
                 string title = "";
-                
+
                 MapDataModelNew mdat = new MapDataModelNew();
 
                 string err = "stackTrace";
@@ -2833,7 +2809,7 @@ namespace VoterAnalysisParser
                         mdm.date = mdat.data[j].date;
                         mdm.breakpoint = Convert.ToInt32(mdat.data[j].breakpoint);
                         mdm.stage = mdat.data[j].stage;
-                        
+
                         mData.Add(mdm);
 
                         if (j == 0)
@@ -2846,12 +2822,12 @@ namespace VoterAnalysisParser
                     dt = ListToDataTable<MapSQLModelNew>(mData);
                     UpdateVAMapDataNew(dt);
 
-                    
+
                     int numBands = mdat.breakpoints.Length + 1;
                     int numRec = getPrevNumBands(VA_Data_Id);
                     if (numRec > numBands)
                         deleteMapMetaDataRecords(VA_Data_Id, numBands);
-                    
+
                     List<MapMetaDataModelNew> mmData = new List<MapMetaDataModelNew>();
 
                     for (int i = 0; i < numBands; i++)
@@ -2888,7 +2864,7 @@ namespace VoterAnalysisParser
                                 mmd.bandLo = mdat.breakpoints[i - 1];
                                 if (numBands == 3)
                                     mmd.bandHi = mdat.upper_limit;
-                                else 
+                                else
                                     mmd.bandHi = mdat.breakpoints[i] - 1;
                                 break;
 
@@ -2927,7 +2903,7 @@ namespace VoterAnalysisParser
 
                 }
 
-                
+
                 //url = $"{baseUrl}{stacktype}{stackTypes[4]}{calltype}{callTypes[2]}{race}";
                 //jsonData = SendAPIRequest(url);
 
@@ -3272,9 +3248,9 @@ namespace VoterAnalysisParser
                     ProcessManualDataNew(jsonData, update, fullTick);
                 else if (faq == "map")
                     ProcessMapDataNew(jsonData, update);
-                
+
             }
-            
+
         }
 
         public void SendReceipt(string update)
@@ -3316,7 +3292,7 @@ namespace VoterAnalysisParser
                 test.election_event = electionEvent;
 
             }
-            
+
             string JSONrequest = JsonConvert.SerializeObject(test);
 
             string result = "";
@@ -3330,7 +3306,7 @@ namespace VoterAnalysisParser
                 this.Invoke(new TextWrite(writeTextbox), result);
             else
                 textBox1.Text = result;
-            
+
         }
 
         public void SendManualReceipt(string update)
@@ -3399,12 +3375,12 @@ namespace VoterAnalysisParser
                         sq.st = questions.State;
                         sq.State = GetStateName(sq.st);
                         sq.race_id = questions.race_id;
-                        
+
                         if (questions.question.Length > 120)
-                            sq.question = questions.question.Substring(0,120);
+                            sq.question = questions.question.Substring(0, 120);
                         else
                             sq.question = questions.question;
-                        
+
                         sq.qcode = questions.qcode;
                         sq.filter = questions.filter;
                         sq.sample_size = (int)Convert.ToSingle(questions.sample_size);
@@ -3429,15 +3405,15 @@ namespace VoterAnalysisParser
 
 
                         sq.variable_weight = (int)Convert.ToSingle(questions.h_answers[j].variable_weight);
-                        sq.variable_count =  (int)Convert.ToSingle(questions.h_answers[j].variable_count);
+                        sq.variable_count = (int)Convert.ToSingle(questions.h_answers[j].variable_count);
                         sq.variable_percent = Convert.ToInt32(questions.h_answers[j].variable_percent);
                         sq.original_order = Convert.ToInt32(questions.h_answers[j].original_order);
-                        
+
                         sq.name = questions.h_answers[j].original_name;
                         if (sq.name.Length > 50)
                             sq.name = sq.name.Substring(0, 50);
-                        
-                        
+
+
                         sq.alias = questions.h_answers[j].alias_name;
                         sq.new_order = Convert.ToInt32(questions.h_answers[j].new_order);
 
@@ -3452,7 +3428,7 @@ namespace VoterAnalysisParser
                     }
 
                     //dataGridView1.DataSource = sqm;
-                    
+
                     DeleteDataNew(update, false);
 
                     DataTable dt = new DataTable();
@@ -3472,7 +3448,7 @@ namespace VoterAnalysisParser
                 {
                     //listBox2.Items.Add($"Data error for Q: {update}");
                     log.Error($"Data error for Q: {update}");
-                    
+
                     string s = $"Data error for Q: {update}";
                     if (this.InvokeRequired)
                         this.Invoke(new ListErr(writeListbox2), s);
@@ -3551,7 +3527,7 @@ namespace VoterAnalysisParser
 
                         sq.active = manual.active;
                         sq.status = manual.status;
-                        
+
                         sqm.Add(sq);
 
                     }
@@ -3697,13 +3673,13 @@ namespace VoterAnalysisParser
                     int cnt = 0;
                     int n = answers.h_answers.Count() + 1;
 
-                    
+
                     for (int j = 0; j < answers.h_answers.Count(); j++)
                     {
 
 
 
-                        
+
                         for (int ri = 0; ri < answers.h_answers[j].results.Count() + 1; ri++)
                         {
                             VASQLDataModelNew sq = new VASQLDataModelNew();
@@ -3784,7 +3760,7 @@ namespace VoterAnalysisParser
                                 sq.result_weight = Convert.ToSingle(answers.h_answers[j].results[ri - 1].result_weight);
                                 sq.result_count = (int)Convert.ToSingle(answers.h_answers[j].results[ri - 1].result_count);
                                 sq.result_percent = Convert.ToInt32(answers.h_answers[j].results[ri - 1].result_percent);
-                                
+
                                 sq.party = answers.h_answers[j].results[ri - 1].party;
 
                                 if (sq.name == "Republican" || sq.name == "Democrat")
@@ -3867,7 +3843,7 @@ namespace VoterAnalysisParser
                     rf = true;
                 }
                 if (i == 3 && cbTKQ.Checked)
-                { 
+                {
                     test.stack_type = "ticker-question";
                     rf = true;
                 }
@@ -4011,7 +3987,7 @@ namespace VoterAnalysisParser
                     int pos;
                     string deleteStr;
                     string updateType = "";
-                    
+
                     // clear updates lists
                     QuestionDeletes.Clear();
                     AnswerDeletes.Clear();
@@ -4143,7 +4119,7 @@ namespace VoterAnalysisParser
                         if (updateType != "0")
                             ProcessUpdatesNew(updateType);
                     }
-                    
+
                 }
                 else
                 {
@@ -4276,7 +4252,7 @@ namespace VoterAnalysisParser
                     }
                     else
                     {
-                        tblName = "FE_VoterAnalysisData_Map_New"; 
+                        tblName = "FE_VoterAnalysisData_Map_New";
                         delCmd = $"DELETE FROM {tblName} WHERE VA_Data_Id = '{update}'";
                         IssueSQLCmd(delCmd);
 
@@ -4296,7 +4272,7 @@ namespace VoterAnalysisParser
 
                 if (sendReceipt)
                 {
-                    SendReceipt(update); 
+                    SendReceipt(update);
                     log.Info($"  SendReceipt:    {update}");
 
                     string s = $"Deleted: {update}";
@@ -4328,24 +4304,20 @@ namespace VoterAnalysisParser
                 baseUrl = Properties.Settings.Default.URL_Prod;
                 apiKey = Properties.Settings.Default.api_key_Prod;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
-                btnAPI.Text = "Switch to Test API";
-                lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
+                btnAPI.Text = "Switch to Stage API";
+                lblBaseUrl.Text = $"URL: Prod:   {baseUrl}";
             }
             else
             {
-                baseUrl = Properties.Settings.Default.URL_QA;
-                apiKey = Properties.Settings.Default.api_key_QA;
-                dbConn = Properties.Settings.Default.dbConn_QA;
+                baseUrl = Properties.Settings.Default.URL_Stg;
+                apiKey = Properties.Settings.Default.api_key_Stg;
+                dbConn = Properties.Settings.Default.dbConn_Prod;
                 btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"Using Test API: {baseUrl}";
+                lblBaseUrl.Text = $"URL: {useURL}:   {baseUrl}";
             }
         }
 
-        //private void button17_Click_1(object sender, EventArgs e)
-        //{
-
-        //}
-
+ 
         private void btnRunStop_Click(object sender, EventArgs e)
         {
             if (runStop == "Start")
@@ -4410,6 +4382,21 @@ namespace VoterAnalysisParser
                         break;
 
                 }
+            }
+        }
+
+        private void button17_Click_1(object sender, EventArgs e)
+        {
+            string Race = tbRace.Text;
+            int pos = Race.LastIndexOf("|");
+            if (pos >= 0)
+            {
+                string deleteStr = Race.Substring(pos + 1);
+                Race = Race.Substring(0, pos);
+                if (deleteStr == "delete")
+                    DeleteDataNew(Race, true);
+                else
+                    ProcessUpdate(Race);
             }
         }
     }
