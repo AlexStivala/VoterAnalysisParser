@@ -2884,7 +2884,7 @@ namespace VoterAnalysisParser
                     }
                     SendReceipt(VA_Data_Id);
 
-                    string s = $"M: {VA_Data_Id}  OK";
+                    string s = $"X: {VA_Data_Id}  OK";
                     if (this.InvokeRequired)
                         this.Invoke(new ListErr(writeListbox2), s);
                     else
@@ -3398,7 +3398,13 @@ namespace VoterAnalysisParser
 
                         }
 
+
                         sq.preface = questions.preface;
+                        if (sq.ofc == "S")
+                            sq.preface = questions.preface + " SENATE";
+                        else if (sq.ofc == "G")
+                            sq.preface = questions.preface + "GOVERNOR";
+                        
                         sq.header = questions.header;
                         sq.updated = questions.last_updated;
                         sq.election_event = questions.election_event;
@@ -3677,9 +3683,6 @@ namespace VoterAnalysisParser
                     for (int j = 0; j < answers.h_answers.Count(); j++)
                     {
 
-
-
-
                         for (int ri = 0; ri < answers.h_answers[j].results.Count() + 1; ri++)
                         {
                             VASQLDataModelNew sq = new VASQLDataModelNew();
@@ -3714,7 +3717,13 @@ namespace VoterAnalysisParser
 
                             sq.sample_size = (int)Convert.ToSingle(answers.sample_size);
                             sq.total_weight = Convert.ToSingle(answers.total_weight);
+
                             sq.preface = answers.preface;
+                            if (sq.ofc == "S")
+                                sq.preface = answers.preface + " SENATE";
+                            else if (sq.ofc == "G")
+                                sq.preface = answers.preface + "GOVERNOR";
+
                             sq.header = answers.header;
                             sq.updated = answers.last_updated;
                             sq.election_event = answers.election_event;
@@ -3823,7 +3832,7 @@ namespace VoterAnalysisParser
             listBox1.Items.Clear();
             VAPostModel test = new VAPostModel();
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 6; i++)
             {
                 bool rf = false;
                 test.request_type = "stack";
@@ -3854,7 +3863,16 @@ namespace VoterAnalysisParser
                     test.stack_type = "";
                     rf = true;
                 }
+                if (i == 5 && cbMan.Checked)
+                {
+                    //{ 'request_type': 'map', 'method': 'refresh', 'election_event': '2020_General'}
+                    //{ "request_type":"manual","method":"refresh", "election_event":"2020_General"}
+                    test.request_type = "manual";
+                    test.stack_type = "";
+                    rf = true;
+                }
 
+                
                 if (rf)
                 {
                     test.method = "refresh";
