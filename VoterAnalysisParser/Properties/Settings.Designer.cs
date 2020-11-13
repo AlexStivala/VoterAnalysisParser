@@ -25,7 +25,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://y384o59d2e.execute-api.us-west-2.amazonaws.com/prod")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://6iiis3k1zi.execute-api.us-east-1.amazonaws.com/prd/edspost")]
         public string URL_Prod {
             get {
                 return ((string)(this["URL_Prod"]));
@@ -34,7 +34,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("u5HPTwm77q2VxbXRUS6KG3UiKlR0FJEd48CTCoJk")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PxYYnpN5i08mPYgBjPbwN47VaZbr1vgOUGQ3szIb")]
         public string api_key_Prod {
             get {
                 return ((string)(this["api_key_Prod"]));
@@ -109,7 +109,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Stg")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Prod")]
         public string useURL {
             get {
                 return ((string)(this["useURL"]));

@@ -132,16 +132,18 @@ namespace VoterAnalysisParser
                 baseUrl = Properties.Settings.Default.URL_Prod;
                 apiKey = Properties.Settings.Default.api_key_Prod;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
-                btnAPI.Text = "Switch to {useURL} API";
+                btnAPI.Text = $"Switch to Stg API";
                 lblBaseUrl.Text = $"Using Prod API: {baseUrl}";
+                prodMode = true;
             }
             else if (useURL == "Dev")
             {
                 baseUrl = Properties.Settings.Default.URL_Dev;
                 apiKey = Properties.Settings.Default.api_key_Dev;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
-                btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"URL: {useURL}:   {baseUrl}";
+                btnAPI.Text = "Switch to Stg API";
+                lblBaseUrl.Text = $"Using Dev API:   {baseUrl}";
+                prodMode = false;
             }
             else if (useURL == "Stg")
             {
@@ -149,7 +151,8 @@ namespace VoterAnalysisParser
                 apiKey = Properties.Settings.Default.api_key_Stg;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
                 btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"URL: {useURL}:   {baseUrl}";
+                lblBaseUrl.Text = $"Using Stg API:   {baseUrl}";
+                prodMode = false;
             }
 
             var builder = new SqlConnectionStringBuilder(dbConn);
@@ -3229,7 +3232,7 @@ namespace VoterAnalysisParser
             if (pos >= 0)
             {
                 // Error - send receipt
-                SendReceipt(update);
+                //SendReceipt(update);
 
                 string s = $"Data Error for: {update}";
                 if (this.InvokeRequired)
@@ -3882,8 +3885,10 @@ namespace VoterAnalysisParser
                     string result = SendAPIPostRequest(JSONrequest);
 
                     string s = $"Refreshed {test.stack_type}";
-                    if (i == 4)
-                        s = $"Refreshed {"map"}";
+                    if (i >= 4)
+                        s = $"Refreshed {test.request_type}";
+                    
+                    
                     if (this.InvokeRequired)
                         this.Invoke(new ListErr(writeListbox2), s);
                     else
@@ -4323,7 +4328,7 @@ namespace VoterAnalysisParser
                 apiKey = Properties.Settings.Default.api_key_Prod;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
                 btnAPI.Text = "Switch to Stage API";
-                lblBaseUrl.Text = $"URL: Prod:   {baseUrl}";
+                lblBaseUrl.Text = $"Using Prod API:   {baseUrl}";
             }
             else
             {
@@ -4331,7 +4336,7 @@ namespace VoterAnalysisParser
                 apiKey = Properties.Settings.Default.api_key_Stg;
                 dbConn = Properties.Settings.Default.dbConn_Prod;
                 btnAPI.Text = "Switch to Prod API";
-                lblBaseUrl.Text = $"URL: {useURL}:   {baseUrl}";
+                lblBaseUrl.Text = $"Using Stg API:   {baseUrl}";
             }
         }
 

@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="URL_Prod" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">https://y384o59d2e.execute-api.us-west-2.amazonaws.com/prod</Value>
+      <Value Profile="(Default)">https://6iiis3k1zi.execute-api.us-east-1.amazonaws.com/prd/edspost</Value>
     </Setting>
     <Setting Name="api_key_Prod" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">u5HPTwm77q2VxbXRUS6KG3UiKlR0FJEd48CTCoJk</Value>
+      <Value Profile="(Default)">PxYYnpN5i08mPYgBjPbwN47VaZbr1vgOUGQ3szIb</Value>
     </Setting>
     <Setting Name="dbConn_Prod" Type="(Connection string)" Scope="Application">
       <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
@@ -34,7 +34,7 @@
       <Value Profile="(Default)">2020_General</Value>
     </Setting>
     <Setting Name="useURL" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Stg</Value>
+      <Value Profile="(Default)">Prod</Value>
     </Setting>
   </Settings>
 </SettingsFile>
