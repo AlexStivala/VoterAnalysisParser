@@ -100,7 +100,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2020_General")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2021_GA_Senate_Runoffs")]
         public string electionEvent {
             get {
                 return ((string)(this["electionEvent"]));
@@ -109,7 +109,7 @@ namespace VoterAnalysisParser.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Prod")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Stg")]
         public string useURL {
             get {
                 return ((string)(this["useURL"]));

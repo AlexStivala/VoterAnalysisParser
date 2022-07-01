@@ -165,6 +165,8 @@ namespace VoterAnalysisParser
             //lblBaseUrl.Text = newbaseUrl;
             lblDB.Text = $"{dataSource}  {initCat}";
 
+            lblEE.Text = Properties.Settings.Default.electionEvent;
+
             //client.DefaultRequestHeaders.Add("x-api-key", newapiKey);
 
         }
@@ -3401,9 +3403,14 @@ namespace VoterAnalysisParser
 
                         }
 
+                        if (questions.race_id == "GA-S-125971" || questions.race_id == "GA-S-125970")
+                        {
+                            sq.ofc = "S2";
+                            sq.race_type = "S2";
+                        }
 
                         sq.preface = questions.preface;
-                        if (sq.ofc == "S")
+                        if (sq.ofc == "S" || sq.ofc == "S2")
                             sq.preface = questions.preface + " SENATE";
                         else if (sq.ofc == "G")
                             sq.preface = questions.preface + "GOVERNOR";
@@ -3718,11 +3725,17 @@ namespace VoterAnalysisParser
                                 sq.race_type = answers.race_type;
                             }
 
+                            if (answers.race_id == "GA-S-125971" || answers.race_id == "GA-S-125970" || answers.race_id == "GA-S2-125970")
+                            {
+                                sq.ofc = "S2";
+                                sq.race_type = "S2";
+                            }
+
                             sq.sample_size = (int)Convert.ToSingle(answers.sample_size);
                             sq.total_weight = Convert.ToSingle(answers.total_weight);
 
                             sq.preface = answers.preface;
-                            if (sq.ofc == "S")
+                            if (sq.ofc == "S" || sq.ofc == "S2")
                                 sq.preface = answers.preface + " SENATE";
                             else if (sq.ofc == "G")
                                 sq.preface = answers.preface + "GOVERNOR";

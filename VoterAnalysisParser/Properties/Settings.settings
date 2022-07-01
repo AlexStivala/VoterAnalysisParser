@@ -31,10 +31,10 @@
       <Value Profile="(Default)">pZXVLzYcvP3avlnH1n6ND9NCtLWMbivOaOhzLD8k</Value>
     </Setting>
     <Setting Name="electionEvent" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">2020_General</Value>
+      <Value Profile="(Default)">2021_GA_Senate_Runoffs</Value>
     </Setting>
     <Setting Name="useURL" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Prod</Value>
+      <Value Profile="(Default)">Stg</Value>
     </Setting>
   </Settings>
 </SettingsFile>
